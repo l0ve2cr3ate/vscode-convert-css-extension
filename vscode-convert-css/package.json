@@ -10,7 +10,8 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:vscode-convert-css.helloWorld"
+		"onCommand:vscode-convert-css.helloWorld",
+		"onCommand:vscode-convert-css.convertToStyleObject"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
@@ -18,7 +19,11 @@
 			{
 				"command": "vscode-convert-css.helloWorld",
 				"title": "Hello World"
-			}
+			},
+			{
+                "command": "vscode-convert-css.convertToStyleObject",
+                "title": "Convert To Style Object"
+            }
 		]
 	},
 	"scripts": {
