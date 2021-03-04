@@ -10,11 +10,6 @@ export const toCamelCase = (cssPropertyParts: string[]): string[] => {
 export const convertToStyleObject = (code: string): string => {
   const cssPropertyValuePairs = code.split("\n");
 
-  const spliteOnSemiColon = code.split(";");
-
-  console.log({ cssPropertyValuePairs });
-  console.log({ spliteOnSemiColon });
-
   let convertedCssProperty: string;
   let convertedCssValue: string;
 
@@ -26,9 +21,7 @@ export const convertToStyleObject = (code: string): string => {
       // regex to get part after : /(?<=:).*/
       // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
       const cssProperty = css.match(/.+?(?=:)/);
-      console.log({ cssProperty });
       const cssValue = css.match(/(?<=:).*/);
-      console.log({ cssValue });
 
       // convert css property to camelcase
       if (cssProperty && cssProperty[0].includes("-")) {
