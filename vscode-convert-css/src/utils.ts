@@ -1,5 +1,19 @@
+export const toCamelCase = (cssPropertyParts: string[]): string[] => {
+  // remove hyphens and capitalize characters after hyphens (when index is not 0)
+  return cssPropertyParts.map((propertyPart, index) =>
+    index
+      ? `${propertyPart.charAt(0).toUpperCase()}${propertyPart.slice(1)}`
+      : propertyPart
+  );
+};
+
 export const convertToStyleObject = (code: string): string => {
-  const cssPropertyValuePairs = code.split(";");
+  const cssPropertyValuePairs = code.split("\n");
+
+  const spliteOnSemiColon = code.split(";");
+
+  console.log({ cssPropertyValuePairs });
+  console.log({ spliteOnSemiColon });
 
   let convertedCssProperty: string;
   let convertedCssValue: string;
@@ -12,25 +26,24 @@ export const convertToStyleObject = (code: string): string => {
       // regex to get part after : /(?<=:).*/
       // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
       const cssProperty = css.match(/.+?(?=:)/);
+      console.log({ cssProperty });
       const cssValue = css.match(/(?<=:).*/);
+      console.log({ cssValue });
 
       // convert css property to camelcase
       if (cssProperty && cssProperty[0].includes("-")) {
         const cssPropertyParts = cssProperty[0].split("-");
-        // remove hyphens and capitalize characters after hyphens
-        const convertedParts = cssPropertyParts.map((propertyPart, index) =>
-          index
-            ? `${propertyPart.charAt(0).toUpperCase()}${propertyPart.slice(1)}`
-            : propertyPart
-        );
-        convertedCssProperty = convertedParts.join(",").replace(",", "");
+
+        convertedCssProperty = toCamelCase(cssPropertyParts)
+          .join(",")
+          .replace(",", "");
       } else if (cssProperty) {
         convertedCssProperty = cssProperty[0];
       }
 
-      // convert css value to a string and remove white space
+      // remove white space and ; from css value
       if (cssValue) {
-        convertedCssValue = cssValue[0].trimStart();
+        convertedCssValue = cssValue[0].trimStart().replace(";", "");
       }
 
       return `${convertedCssProperty}: "${convertedCssValue}",`;
