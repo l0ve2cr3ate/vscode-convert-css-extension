@@ -8,14 +8,12 @@ export const toCamelCase = (cssPropertyParts: string[]): string[] => {
 };
 
 export const convertToStyleObject = (code: string): string => {
-  const cssPropertyValuePairs = code.split("\n");
-
-  console.log({ cssPropertyValuePairs });
+  const cssLines = code.split("\n");
 
   let convertedCssProperty: string;
   let convertedCssValue: string;
 
-  const convertedCode = cssPropertyValuePairs
+  const convertedCode = cssLines
     .map((css) => {
       if (css === "") return;
       // regex to match characters up until certain character(s): https://stackoverflow.com/questions/7124778/how-to-match-anything-up-until-this-sequence-of-characters-in-a-regular-expres
@@ -23,10 +21,10 @@ export const convertToStyleObject = (code: string): string => {
       // regex to get part after : /(?<=:).*/
       // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
 
-      const htmlTag = css.match(/^((?!\:|,|\.).)*(?={)/);
+      const htmlTag = css.match(/^((?!\:|,|\.|@).)*(?={)/);
       // Match characters up to (but not including) {: /(.+|\.?)([:&\.,]+).+(?={)/ --> this will match css selectors,
       // like pseudo-selectors and classnames which need to be wrapped within quotes.
-      const cssSelector = css.match(/(.+|\.?)([:&\.,]+).+(?={)/);
+      const cssSelector = css.match(/(.+|\.?)([:&\.,@]+).+(?={)/);
       const closingTag = css.match(/}/);
 
       if (htmlTag) {
@@ -58,7 +56,6 @@ export const convertToStyleObject = (code: string): string => {
       // remove white space and ; from css value
       if (cssValue) {
         convertedCssValue = cssValue[0].trimStart().replace(";", "");
-        console.log({ convertedCssValue });
       }
 
       return `${convertedCssProperty}: "${convertedCssValue}",`;

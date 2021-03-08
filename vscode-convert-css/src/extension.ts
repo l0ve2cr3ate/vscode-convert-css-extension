@@ -29,7 +29,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(disposable);
 
-  const reverseWordDisposable = vscode.commands.registerCommand(
+  const convertToStyleObjectDisposable = vscode.commands.registerCommand(
     "vscode-convert-css.convertToStyleObject",
     function () {
       // Get the active text editor
@@ -60,7 +60,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(reverseWordDisposable);
+  context.subscriptions.push(convertToStyleObjectDisposable);
 }
 
 // this method is called when your extension is deactivated
