@@ -19,11 +19,11 @@ export const convertToStyleObject = (code: string): string => {
     .map((css) => {
       if (css === "") return;
       // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
-      const htmlTag = css.match(/^((?!\:|,|\.|@).)*(?={)/);
+      const htmlTag = css.match(/^((?!\:|,|\.|@|\$).)*(?={)/);
       // Match characters up to (but not including) {: /(.+|\.?)([:&\.,]+).+(?={)/ --> this will match css selectors,
       // like pseudo-selectors and classnames which need to be wrapped within quotes.
-      const cssSelector = css.match(/(.+|\.?)([:&\.,@]+).+(?={)/);
-      const closingTag = css.match(/}/);
+      const cssSelector = css.match(/(.+|\.?)([:&\.,@]+).+(?<!\$)(?={)/);
+      const closingTag = css.match(/^[^\$]*?}/);
 
       if (htmlTag) {
         return `${htmlTag[0].trim()}: {`;
@@ -39,6 +39,8 @@ export const convertToStyleObject = (code: string): string => {
 
       const cssProperty = css.match(/(?!&|:).+?(?=:)/);
       const cssValue = css.match(/(?<=:).*/);
+      const propsCssValue = cssValue?.[0].match(/(\${props).+(?=;)/);
+
       const unitlessCssValue = cssValue?.[0]
         .trimStart()
         .match(/^([+-]?([0-9]*)(\.([0-9]+))?)(?=;)/);
@@ -56,12 +58,18 @@ export const convertToStyleObject = (code: string): string => {
 
       // remove white space and ; from css value
       if (cssValue) {
-        convertedCssValue = cssValue[0].trimStart().replace(";", "");
+        // cssValue containing props, like: ${props => props.primary};
+        if (propsCssValue) {
+          convertedCssValue = propsCssValue[0].replace(/\$|{|}|;/g, "");
+        } else {
+          convertedCssValue = cssValue[0].trimStart().replace(";", "");
+        }
       }
 
       if (
-        unitlessCssProperties.includes(convertedCssProperty.trim()) &&
-        unitlessCssValue
+        (unitlessCssProperties.includes(convertedCssProperty.trim()) &&
+          unitlessCssValue) ||
+        propsCssValue
       ) {
         return `${convertedCssProperty}: ${convertedCssValue},`;
       }
