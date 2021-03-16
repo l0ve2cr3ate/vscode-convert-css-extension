@@ -12,6 +12,8 @@ export const toCamelCase = (cssPropertyParts: string[]): string[] => {
 export const convertToStyleObject = (code: string): string => {
   const cssLines = code.split("\n");
 
+  console.log({ code });
+
   let convertedCssProperty: string;
   let convertedCssValue: string;
 
@@ -19,10 +21,12 @@ export const convertToStyleObject = (code: string): string => {
     .map((css) => {
       if (css === "") return;
       // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
-      const htmlTag = css.match(/^((?!\:|,|\.|@|\$).)*(?={)/);
+      const htmlTag = css.match(/^((?!\:|,|\.|@|\$|>|~|\+|#).)*(?={)/);
       // Match characters up to (but not including) {: /(.+|\.?)([:&\.,]+).+(?={)/ --> this will match css selectors,
       // like pseudo-selectors and classnames which need to be wrapped within quotes.
-      const cssSelector = css.match(/(.+|\.?)([:&\.,@]+).+(?<!\$)(?={)/);
+      const cssSelector = css.match(
+        /(.+|\.?)([:&\.,@,>,~,+,#]+).+(?<!\$)(?={)/
+      );
       const closingTag = css.match(/^[^\$]*?}/);
 
       if (htmlTag) {
@@ -76,6 +80,8 @@ export const convertToStyleObject = (code: string): string => {
       return `${convertedCssProperty}: "${convertedCssValue}",`;
     })
     .join("\n");
+
+  console.log({ convertedCode });
 
   return convertedCode;
 };
