@@ -66,7 +66,7 @@ export const convertToStyleObject = (code: string): string => {
         if (propsCssValue) {
           convertedCssValue = propsCssValue[0].replace(/\$|{|}|;/g, "");
         } else {
-          convertedCssValue = cssValue[0].trimStart().replace(";", "");
+          convertedCssValue = cssValue[0].trim().replace(";", "");
         }
       }
 
