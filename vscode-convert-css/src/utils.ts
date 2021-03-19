@@ -55,7 +55,7 @@ export const convertToStyleObject = (code: string): string => {
 
         convertedCssProperty = toCamelCase(cssPropertyParts)
           .join(",")
-          .replace(",", "");
+          .replace(/,/g, "");
       } else if (cssProperty) {
         convertedCssProperty = cssProperty[0];
       }
