@@ -45,6 +45,10 @@ export const convertToStyleObject = (code: string): string => {
       const cssValue = css.match(/(?<=:).*/);
       const propsCssValue = cssValue?.[0].match(/(\${props).+(?=;)/);
 
+      if (!cssProperty || !cssValue) {
+        return;
+      }
+
       const unitlessCssValue = cssValue?.[0]
         .trimStart()
         .match(/^([+-]?([0-9]*)(\.([0-9]+))?)(?=;)/);
