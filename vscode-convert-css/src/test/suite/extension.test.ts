@@ -90,4 +90,78 @@ suite("Extension Utils Tests", function () {
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
   });
+
+  test("Should generate correct styleObject for css containing htmlTag and class", function () {
+    const code = "article.name {\n    font-size: 16px;\n  }";
+    const styleObject = '"article.name": {\n    fontSize: "16px",\n  }';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for css containing htmlTag and class", function () {
+    const code = "article.name {\n    font-size: 16px;\n  }";
+    const styleObject = '"article.name": {\n    fontSize: "16px",\n  }';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for css containing multiple htmlTags", function () {
+    const code = " article, a {\n   color: #fff;\n }";
+    const styleObject = '"article, a": {\n   color: "#fff",\n }';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for css containing multiple classes", function () {
+    const code = ".firstname.something {\n   color: #fff;\n }";
+    const styleObject = '".firstname.something": {\n   color: "#fff",\n }';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for css containing child selector", function () {
+    const code = "ul > li {\n   background-color: #eee;\n }";
+    const styleObject = '"ul > li": {\n   backgroundColor: "#eee",\n }';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for css containing sibling selector", function () {
+    const code = "div + span {\n  margin: 1rem;\n}";
+    const styleObject = '"div + span": {\n  margin: "1rem",\n}';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for css property with multiple dashes", function () {
+    const code = " grid-template-columns: 60px 60px;";
+    const styleObject = ' gridTemplateColumns: "60px 60px",';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for css containing vendor prefixes", function () {
+    const code = "-webkit-background-clip: text;";
+    const styleObject = 'WebkitBackgroundClip: "text",';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for css selection containing empty line(s)", function () {
+    const code =
+      "p {\n    background-color: blue;\n    font-size: 1rem;\n    \n    \n  }";
+    const styleObject =
+      'p: {\n    backgroundColor: "blue",\n    fontSize: "1rem",\n\n\n  }';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
 });
