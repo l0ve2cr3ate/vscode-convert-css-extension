@@ -20,6 +20,11 @@ export const convertToStyleObject = (code: string): string => {
   const convertedCode = cssLines
     .map((css) => {
       if (css === "") return;
+      const styledComponentFirstLine = css.match(
+        /(const )(.+)(= styled\.)(.+((<.+>)?)`)/
+      );
+      const styledComponentLastLine = css.match(/`;$/);
+
       // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
       const htmlTag = css.match(/^((?!\:|,|\.|@|\$|>|~|\+|#).)*(?={)/);
       // Match characters up to (but not including) {: /(.+|\.?)([:&\.,]+).+(?={)/ --> this will match css selectors,
@@ -28,6 +33,10 @@ export const convertToStyleObject = (code: string): string => {
         /(.+|\.?)([:&\.,@,>,~,+,#]+).+(?<!\$)(?={)/
       );
       const closingTag = css.match(/^[^\$]*?}/);
+
+      if (styledComponentFirstLine) {
+        return styledComponentFirstLine[0].replace("`", "({");
+      }
 
       if (htmlTag) {
         return `${htmlTag[0].trim()}: {`;
@@ -39,6 +48,10 @@ export const convertToStyleObject = (code: string): string => {
 
       if (closingTag) {
         return closingTag[0];
+      }
+
+      if (styledComponentLastLine) {
+        return styledComponentLastLine[0].replace("`", "})");
       }
 
       const cssProperty = css.match(/(?!&|:).+?(?=:)/);
