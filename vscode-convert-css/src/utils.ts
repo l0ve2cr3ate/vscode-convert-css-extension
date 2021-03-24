@@ -1,5 +1,15 @@
 import { unitlessCssProperties } from "./unitlessCssProperties";
 
+export const matchStyledComponentFirstLine = (css: string) =>
+  css.match(/(const )(.+)(= styled\.)(.+((<.+>)?)`)/);
+export const matchStyledComponentLastLine = (css: string) => css.match(/`;$/);
+
+export const convertStyledComponentFirstLine = (firstLine: string) =>
+  firstLine.replace("`", "({");
+
+export const convertStyledComponentLastLine = (lastLine: string) =>
+  lastLine.replace("`", "})");
+
 export const toCamelCase = (cssPropertyParts: string[]): string[] => {
   // remove hyphens and capitalize characters after hyphens (when index is not 0)
   return cssPropertyParts.map((propertyPart, index) =>
@@ -20,10 +30,11 @@ export const convertToStyleObject = (code: string): string => {
   const convertedCode = cssLines
     .map((css) => {
       if (css === "") return;
-      const styledComponentFirstLine = css.match(
-        /(const )(.+)(= styled\.)(.+((<.+>)?)`)/
-      );
-      const styledComponentLastLine = css.match(/`;$/);
+
+      console.log({ css });
+
+      const styledComponentFirstLine = matchStyledComponentFirstLine(css);
+      const styledComponentLastLine = matchStyledComponentLastLine(css);
 
       // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
       const htmlTag = css.match(/^((?!\:|,|\.|@|\$|>|~|\+|#).)*(?={)/);
@@ -35,7 +46,7 @@ export const convertToStyleObject = (code: string): string => {
       const closingTag = css.match(/^[^\$]*?}/);
 
       if (styledComponentFirstLine) {
-        return styledComponentFirstLine[0].replace("`", "({");
+        return convertStyledComponentFirstLine(styledComponentFirstLine[0]);
       }
 
       if (htmlTag) {
@@ -51,7 +62,7 @@ export const convertToStyleObject = (code: string): string => {
       }
 
       if (styledComponentLastLine) {
-        return styledComponentLastLine[0].replace("`", "})");
+        return convertStyledComponentLastLine(styledComponentLastLine[0]);
       }
 
       const cssProperty = css.match(/(?!&|:).+?(?=:)/);
