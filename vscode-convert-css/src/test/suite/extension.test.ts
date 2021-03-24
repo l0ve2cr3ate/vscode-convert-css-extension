@@ -1,8 +1,15 @@
 import * as assert from "assert";
 // import * as vscode from "vscode";
-import { convertToStyleObject, toCamelCase } from "../../utils";
+import {
+  convertStyledComponentFirstLine,
+  convertStyledComponentLastLine,
+  convertToStyleObject,
+  matchStyledComponentFirstLine,
+  matchStyledComponentLastLine,
+  toCamelCase,
+} from "../../utils";
 
-suite("Extension Utils Tests", function () {
+suite("Extension Utils Tests for converting to camelCase", function () {
   test("Should generate correct camelCase for css property font-weight", function () {
     const cssProperty = ["font-weight"];
     const camelCaseProperty = "fontWeight";
@@ -46,7 +53,9 @@ suite("Extension Utils Tests", function () {
 
     assert.strictEqual(camelCasePrefix, convertedProperty);
   });
+});
 
+suite("Tests for Extension Utils Convert to styleObject", function () {
   test("Should generate correct styleObject for css containing unitless values", function () {
     const code =
       "background-color: blue;\n    z-index: 2;\n    opacity: 0.1;\n    font-size: 16px;\n    font-weight: 600;";
@@ -164,4 +173,97 @@ suite("Extension Utils Tests", function () {
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
   });
+
+  test("Should generate correct styleObject for code containing first line of styled component with typed props", function () {
+    const code = "const Button = styled.button`";
+    const styleObject = "const Button = styled.button({";
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for code containing first line of styled component with typed props", function () {
+    const code = "const Button = styled.button<ButtonProps>`";
+    const styleObject = "const Button = styled.button<ButtonProps>({";
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for code containing last line of styled component", function () {
+    const code = "`;";
+    const styleObject = "});";
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
 });
+
+suite("Tests for Extension Utils Regex", function () {
+  test("Should match styled component first line", function () {
+    const css = "const Button = styled.button`";
+    const match = "const Button = styled.button`";
+
+    const result = matchStyledComponentFirstLine(css);
+
+    let matchResult;
+    if (result) {
+      matchResult = result[0];
+    }
+
+    assert.strictEqual(match, matchResult);
+  });
+
+  test("Should match styled component first line with typed props", function () {
+    const css = "const Button = styled.button<ButtonProps>`";
+    const match = "const Button = styled.button<ButtonProps>`";
+
+    const result = matchStyledComponentFirstLine(css);
+
+    let matchResult;
+    if (result) {
+      matchResult = result[0];
+    }
+
+    assert.strictEqual(match, matchResult);
+  });
+
+  test("Should match styled component last line", function () {
+    const css = "`;";
+    const match = "`;";
+    const result = matchStyledComponentLastLine(css);
+
+    let matchResult;
+    if (result) {
+      matchResult = result[0];
+    }
+
+    assert.strictEqual(match, matchResult);
+  });
+});
+
+suite(
+  "Tests for Extension Utils convert first and last line functions",
+  function () {
+    test("Should correctly convert styled component first line", function () {
+      const styledComponentFirstLine =
+        "const Button = styled.button<ButtonProps>`";
+      const match = "const Button = styled.button<ButtonProps>({";
+      const convertedCode = convertStyledComponentFirstLine(
+        styledComponentFirstLine
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
+    test("Should correctly convert styled component last line", function () {
+      const styledComponentLastLine = "`;";
+      const match = "});";
+      const convertedCode = convertStyledComponentLastLine(
+        styledComponentLastLine
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+  }
+);
