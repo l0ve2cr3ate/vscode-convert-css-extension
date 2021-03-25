@@ -1,7 +1,7 @@
 import { unitlessCssProperties } from "./unitlessCssProperties";
 
 export const matchStyledComponentFirstLine = (css: string) =>
-  css.match(/(const )(.+)(= styled\.)(.+((<.+>)?)`)/);
+  css.match(/(const )(.+)(= styled\.|styled\()(.+`)/);
 export const matchStyledComponentLastLine = (css: string) => css.match(/`;$/);
 
 export const convertStyledComponentFirstLine = (firstLine: string) =>
