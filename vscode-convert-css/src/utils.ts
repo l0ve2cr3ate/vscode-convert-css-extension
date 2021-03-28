@@ -4,11 +4,26 @@ export const matchStyledComponentFirstLine = (css: string) =>
   css.match(/(const )(.+)(= styled\.|styled\()(.+`)/);
 export const matchStyledComponentLastLine = (css: string) => css.match(/`;$/);
 
-export const convertStyledComponentFirstLine = (firstLine: string) =>
-  firstLine.replace("`", "({");
+export const convertStyledComponentFirstLine = (
+  firstLine: string,
+  containsProps: boolean
+) => {
+  if (containsProps) {
+    return firstLine.replace("`", "(props => ({");
+  }
+  return firstLine.replace("`", "({");
+};
 
-export const convertStyledComponentLastLine = (lastLine: string) =>
-  lastLine.replace("`", "})");
+export const convertStyledComponentLastLine = (
+  lastLine: string,
+  containsProps: boolean
+) => {
+  if (containsProps) {
+    return lastLine.replace("`", "}))");
+  }
+
+  return lastLine.replace("`", "})");
+};
 
 export const toCamelCase = (cssPropertyParts: string[]): string[] => {
   // remove hyphens and capitalize characters after hyphens (when index is not 0)
@@ -26,6 +41,7 @@ export const convertToStyleObject = (code: string): string => {
 
   let convertedCssProperty: string;
   let convertedCssValue: string;
+  const containsProps: boolean = code.includes("props");
 
   const convertedCode = cssLines
     .map((css) => {
@@ -46,7 +62,10 @@ export const convertToStyleObject = (code: string): string => {
       const closingTag = css.match(/^[^\$]*?}/);
 
       if (styledComponentFirstLine) {
-        return convertStyledComponentFirstLine(styledComponentFirstLine[0]);
+        return convertStyledComponentFirstLine(
+          styledComponentFirstLine[0],
+          containsProps
+        );
       }
 
       if (htmlTag) {
@@ -62,12 +81,15 @@ export const convertToStyleObject = (code: string): string => {
       }
 
       if (styledComponentLastLine) {
-        return convertStyledComponentLastLine(styledComponentLastLine[0]);
+        return convertStyledComponentLastLine(
+          styledComponentLastLine[0],
+          containsProps
+        );
       }
 
       const cssProperty = css.match(/(?!&|:).+?(?=:)/);
       const cssValue = css.match(/(?<=:).*/);
-      const propsCssValue = cssValue?.[0].match(/(\${props).+(?=;)/);
+      const propsCssValue = cssValue?.[0].match(/(props\.).+(?=})/);
 
       if (!cssProperty || !cssValue) {
         return;
@@ -88,11 +110,10 @@ export const convertToStyleObject = (code: string): string => {
         convertedCssProperty = cssProperty[0];
       }
 
-      // remove white space and ; from css value
       if (cssValue) {
         // cssValue containing props, like: ${props => props.primary};
         if (propsCssValue) {
-          convertedCssValue = propsCssValue[0].replace(/\$|{|}|;/g, "");
+          convertedCssValue = propsCssValue[0];
         } else {
           convertedCssValue = cssValue[0].trim().replace(";", "");
         }
