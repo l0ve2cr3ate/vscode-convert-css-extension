@@ -69,7 +69,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
     const code =
       'background-color: ${props => props.primary ? "blue" : "white"};\n    font-size: ${props => props.size};';
     const styleObject =
-      'backgroundColor: props => props.primary ? "blue" : "white",\n    fontSize: props => props.size,';
+      'backgroundColor: props.primary ? "blue" : "white",\n    fontSize: props.size,';
     const convertedCode = convertToStyleObject(code);
 
     assert.strictEqual(styleObject, convertedCode);
@@ -191,16 +191,16 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
   });
 
   test("Should generate correct styleObject for code containing first line of styled component styling another component", function () {
-    const code = "const Button = styled(Button)`";
-    const styleObject = "const Button = styled(Button)({";
+    const code = "const Button = styled(Btn)`";
+    const styleObject = "const Button = styled(Btn)({";
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
   });
 
   test("Should generate correct styleObject for code containing first line of styled component styling another component + with typed props", function () {
-    const code = "const Button = styled(Button)<ButtonProps>`";
-    const styleObject = "const Button = styled(Button)<ButtonProps>({";
+    const code = "const Button = styled(Btn)<ButtonProps>`";
+    const styleObject = "const Button = styled(Btn)<ButtonProps>({";
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
@@ -209,6 +209,46 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
   test("Should generate correct styleObject for code containing last line of styled component", function () {
     const code = "`;";
     const styleObject = "});";
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for styled component containing props", function () {
+    const code =
+      'const Button = styled.button`\n  color: ${(props) => props.primary};\n  flex-direction: ${(props) => props.color && "column"};\n  background-color: ${(props) => props.bg || "palevioletred"};\n`;';
+    const styleObject =
+      'const Button = styled.button(props => ({\n  color: props.primary,\n  flexDirection: props.color && "column",\n  backgroundColor: props.bg || "palevioletred",\n}));';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for styled component containing typed props + css props value", function () {
+    const code =
+      'const Button = styled.button<ButtonProps>`\n  color: ${(props) => props.primary};\n  flex-direction: ${(props) => props.color && "column"};\n  background-color: ${(props) => props.bg || "palevioletred"};\n`;';
+    const styleObject =
+      'const Button = styled.button<ButtonProps>(props => ({\n  color: props.primary,\n  flexDirection: props.color && "column",\n  backgroundColor: props.bg || "palevioletred",\n}));';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for styled component styling another component and containing props", function () {
+    const code =
+      'const Btn = styled(Button)`\n  color: ${(props) => props.primary};\n  flex-direction: ${(props) => props.color && "column"};\n  background-color: ${(props) => props.bg || "palevioletred"};\n`;';
+    const styleObject =
+      'const Btn = styled(Button)(props => ({\n  color: props.primary,\n  flexDirection: props.color && "column",\n  backgroundColor: props.bg || "palevioletred",\n}));';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for styled component styling another component + containing typed props + css props value", function () {
+    const code =
+      'const Btn = styled(Button)<BtnProps>`\n  color: ${(props) => props.primary};\n  flex-direction: ${(props) => props.color && "column"};\n  background-color: ${(props) => props.bg || "palevioletred"};\n`;';
+    const styleObject =
+      'const Btn = styled(Button)<BtnProps>(props => ({\n  color: props.primary,\n  flexDirection: props.color && "column",\n  backgroundColor: props.bg || "palevioletred",\n}));';
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
@@ -245,8 +285,8 @@ suite("Tests for Extension Utils Regex", function () {
   });
 
   test("Should match styled component first line styling another component", function () {
-    const css = "const Button = styled(Button)`";
-    const match = "const Button = styled(Button)`";
+    const css = "const Button = styled(Btn)`";
+    const match = "const Button = styled(Btn)`";
     const result = matchStyledComponentFirstLine(css);
 
     let matchResult;
@@ -258,7 +298,7 @@ suite("Tests for Extension Utils Regex", function () {
   });
 
   test("Should not match something that looks like styled component first line", function () {
-    const css = "const Button = styledButton)`";
+    const css = "const Button = styledBtn)`";
     const match = null;
     const result = matchStyledComponentFirstLine(css);
 
@@ -266,8 +306,8 @@ suite("Tests for Extension Utils Regex", function () {
   });
 
   test("Should match styled component first line styling another component, with typed props", function () {
-    const css = "const Button = styled(Button)<ButtonProps>`";
-    const match = "const Button = styled(Button)<ButtonProps>`";
+    const css = "const Button = styled(Btn)<ButtonProps>`";
+    const match = "const Button = styled(Btn)<ButtonProps>`";
 
     const result = matchStyledComponentFirstLine(css);
 
@@ -296,58 +336,118 @@ suite("Tests for Extension Utils Regex", function () {
 suite(
   "Tests for Extension Utils convert first and last line functions",
   function () {
-    test("Should correctly convert styled component first line", function () {
+    test("Should correctly convert styled component first line when no css props value is present", function () {
       const styledComponentFirstLine = "const Button = styled.button`";
       const match = "const Button = styled.button({";
       const convertedCode = convertStyledComponentFirstLine(
-        styledComponentFirstLine
+        styledComponentFirstLine,
+        false
       );
 
       assert.strictEqual(match, convertedCode);
     });
 
-    test("Should correctly convert styled component first line with typed props", function () {
+    test("Should correctly convert styled component first line when css props value is present ${props => props.primary}", function () {
+      const styledComponentFirstLine = "const Button = styled.button`";
+      const match = "const Button = styled.button(props => ({";
+      const convertedCode = convertStyledComponentFirstLine(
+        styledComponentFirstLine,
+        true
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
+    test("Should correctly convert styled component first line with typed props (and no css props value present)", function () {
       const styledComponentFirstLine =
         "const Button = styled.button<ButtonProps>`";
       const match = "const Button = styled.button<ButtonProps>({";
       const convertedCode = convertStyledComponentFirstLine(
-        styledComponentFirstLine
+        styledComponentFirstLine,
+        false
       );
 
       assert.strictEqual(match, convertedCode);
     });
 
-    test("Should correctly convert styled component first line styling another component", function () {
+    test("Should correctly convert styled component first line with typed props when css props value is present: ${props => ...}", function () {
+      const styledComponentFirstLine =
+        "const Button = styled.button<ButtonProps>`";
+      const match = "const Button = styled.button<ButtonProps>(props => ({";
+      const convertedCode = convertStyledComponentFirstLine(
+        styledComponentFirstLine,
+        true
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
+    test("Should correctly convert styled component first line styling another component (when no css props value is present)", function () {
       const styledComponentFirstLine = "const Button = styled(Button)`";
       const match = "const Button = styled(Button)({";
       const convertedCode = convertStyledComponentFirstLine(
-        styledComponentFirstLine
+        styledComponentFirstLine,
+        false
       );
 
       assert.strictEqual(match, convertedCode);
     });
 
-    test("Should correctly convert styled component first line styling another component + with typed props", function () {
-      const styledComponentFirstLine =
-        "const Button = styled(Button)<ButtonProps>`";
-      const match = "const Button = styled(Button)<ButtonProps>({";
+    test("Should correctly convert styled component first line styling another component when css props value is present: ${props => ...}", function () {
+      const styledComponentFirstLine = "const Button = styled(Button)`";
+      const match = "const Button = styled(Button)(props => ({";
       const convertedCode = convertStyledComponentFirstLine(
-        styledComponentFirstLine
+        styledComponentFirstLine,
+        true
       );
 
       assert.strictEqual(match, convertedCode);
     });
 
-    test("Should correctly convert styled component last line", function () {
+    test("Should correctly convert styled component first line styling another component + with typed props + without css props value", function () {
+      const styledComponentFirstLine =
+        "const Button = styled(Btn)<ButtonProps>`";
+      const match = "const Button = styled(Btn)<ButtonProps>({";
+      const convertedCode = convertStyledComponentFirstLine(
+        styledComponentFirstLine,
+        false
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
+    test("Should correctly convert styled component first line styling another component + with typed props + with css props value: ${props => ...}", function () {
+      const styledComponentFirstLine =
+        "const Button = styled(Btn)<ButtonProps>`";
+      const match = "const Button = styled(Btn)<ButtonProps>(props => ({";
+      const convertedCode = convertStyledComponentFirstLine(
+        styledComponentFirstLine,
+        true
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
+    test("Should correctly convert styled component last line when no css props value is present", function () {
       const styledComponentLastLine = "`;";
       const match = "});";
       const convertedCode = convertStyledComponentLastLine(
-        styledComponentLastLine
+        styledComponentLastLine,
+        false
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
+    test("Should correctly convert styled component last line when css props value is present: ${props => props.primary}", function () {
+      const styledComponentLastLine = "`;";
+      const match = "}));";
+      const convertedCode = convertStyledComponentLastLine(
+        styledComponentLastLine,
+        true
       );
 
       assert.strictEqual(match, convertedCode);
     });
   }
 );
-
-// test
