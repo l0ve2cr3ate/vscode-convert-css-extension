@@ -305,6 +305,14 @@ suite("Tests for Extension Utils Regex", function () {
     assert.strictEqual(match, result);
   });
 
+  test("Should not match styled component first line with typo", function () {
+    const css = "const Button = styled.(Btn)`";
+    const match = null;
+    const result = matchStyledComponentFirstLine(css);
+
+    assert.strictEqual(match, result);
+  });
+
   test("Should match styled component first line styling another component, with typed props", function () {
     const css = "const Button = styled(Btn)<ButtonProps>`";
     const match = "const Button = styled(Btn)<ButtonProps>`";
