@@ -124,6 +124,16 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
     assert.strictEqual(styleObject, convertedCode);
   });
 
+  test("Should generate correct styleObject for css containing multiple htmlTags separated by space", function () {
+    const code =
+      "article a {\n    box-shadow: 10px 5px 5px red;\n    border-radius: 50%;\n  }";
+    const styleObject =
+      '"article a": {\n    boxShadow: "10px 5px 5px red",\n    borderRadius: "50%",\n  }';
+    __proto__: Object;
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
   test("Should generate correct styleObject for css containing multiple classes", function () {
     const code = ".firstname.something {\n   color: #fff;\n }";
     const styleObject = '".firstname.something": {\n   color: "#fff",\n }';
