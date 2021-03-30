@@ -53,11 +53,11 @@ export const convertToStyleObject = (code: string): string => {
       const styledComponentLastLine = matchStyledComponentLastLine(css);
 
       // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
-      const htmlTag = css.match(/^((?!\:|,|\.|@|\$|>|~|\+|#).)*(?={)/);
+      const htmlTag = css.match(/^((?!\:|,|\.|@|\$|>|~|\+|#)[a-z])*(\s?)(?={)/);
       // Match characters up to (but not including) {: /(.+|\.?)([:&\.,]+).+(?={)/ --> this will match css selectors,
       // like pseudo-selectors and classnames which need to be wrapped within quotes.
       const cssSelector = css.match(
-        /(.+|\.?)([:&\.,@,>,~,+,#]+).+(?<!\$)(?={)/
+        /(.+|\.?)([:&\.,@,>,~,+,#]|(\s[a-z]\s?)+).+(?<!\$)(?={)/
       );
       const closingTag = css.match(/^[^\$]*?}/);
 
@@ -90,6 +90,9 @@ export const convertToStyleObject = (code: string): string => {
       const cssProperty = css.match(/(?!&|:).+?(?=:)/);
       const cssValue = css.match(/(?<=:).*/);
       const propsCssValue = cssValue?.[0].match(/(props\.).+(?=})/);
+
+      console.log({cssProperty})
+      console.log({cssValue})
 
       if (!cssProperty || !cssValue) {
         return;
