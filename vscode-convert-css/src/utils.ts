@@ -25,6 +25,24 @@ export const convertStyledComponentLastLine = (
   return lastLine.replace("`", "})");
 };
 
+export const convertInterpolationProperty = (
+  css: string,
+  hasTernary: boolean
+) => {
+  if (!hasTernary) {
+    css = css.split(":")?.[0];
+  }
+
+  const convertedCssProperty = css.replace(
+    /(?<=\${)(.*?)(=>\s?)|\(props\) => |\(|\)/g,
+    ""
+  );
+
+  return hasTernary
+    ? `[\`${convertedCssProperty}\`]`
+    : `[\`${convertedCssProperty}\"}\`]`;
+};
+
 export const toCamelCase = (cssPropertyParts: string[]): string[] => {
   // remove hyphens and capitalize characters after hyphens (when index is not 0)
   return cssPropertyParts.map((propertyPart, index) =>
@@ -87,12 +105,17 @@ export const convertToStyleObject = (code: string): string => {
         );
       }
 
+      const cssPropertyWithInterpolation = css.match(/^(\${).+(})/);
       const cssProperty = css.match(/(?!&|:).+?(?=:)/);
-      const cssValue = css.match(/(?<=:).*/);
+      // (?:.(?!:))+$ will match only part after last colon, while (?<=:).* matches part after first colon.
+      const cssValue = cssPropertyWithInterpolation
+        ? css.match(/(?:.(?<!:))+$/)
+        : css.match(/(?<=:).*/);
       const propsCssValue = cssValue?.[0].match(/(props\.).+(?=})/);
 
-      console.log({cssProperty})
-      console.log({cssValue})
+      console.log({ cssPropertyWithInterpolation });
+      console.log({ cssProperty });
+      console.log({ cssValue });
 
       if (!cssProperty || !cssValue) {
         return;
@@ -102,8 +125,15 @@ export const convertToStyleObject = (code: string): string => {
         .trimStart()
         .match(/^([+-]?([0-9]*)(\.([0-9]+))?)(?=;)/);
 
+      if (cssPropertyWithInterpolation) {
+        const hasTernary = cssPropertyWithInterpolation[0].includes("?");
+        convertedCssProperty = convertInterpolationProperty(
+          cssPropertyWithInterpolation[0],
+          hasTernary
+        );
+      }
       // convert css property to camelcase
-      if (cssProperty && cssProperty[0].includes("-")) {
+      else if (cssProperty && cssProperty[0].includes("-")) {
         const cssPropertyParts = cssProperty[0].split("-");
 
         convertedCssProperty = toCamelCase(cssPropertyParts)
@@ -117,6 +147,15 @@ export const convertToStyleObject = (code: string): string => {
         // cssValue containing props, like: ${props => props.primary};
         if (propsCssValue) {
           convertedCssValue = propsCssValue[0];
+        }
+        // if interpolation Property and no ternary, remove }; from css value.
+        else if (
+          cssPropertyWithInterpolation &&
+          !cssPropertyWithInterpolation?.[0].includes("?")
+        ) {
+          convertedCssValue = cssValue[0]
+            .trim()
+            .replace(/(;?)("?)('?)(}?)/g, "");
         } else {
           convertedCssValue = cssValue[0].trim().replace(";", "");
         }
