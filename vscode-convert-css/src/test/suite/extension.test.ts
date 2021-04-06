@@ -5,6 +5,7 @@ import {
   convertStyledComponentFirstLine,
   convertStyledComponentLastLine,
   convertToStyleObject,
+  hasTernary,
   matchStyledComponentFirstLine,
   matchStyledComponentLastLine,
   toCamelCase,
@@ -349,6 +350,19 @@ suite("Tests for Extension Utils Regex", function () {
     }
 
     assert.strictEqual(match, matchResult);
+  });
+
+  test("!!hasTernary should return true for css property with ternary", function () {
+    const css =
+      '${({ vertical }) => (vertical ? "margin-top" : "margin-left")}: 1rem;';
+
+    assert.strictEqual(!!hasTernary(css), true);
+  });
+
+  test("!!hasTernary should return false for css with nullish coalescing operator", function () {
+    const css = 'color: ${(props) => (props.primary ?? "purple")};';
+
+    assert.strictEqual(!!hasTernary(css), false);
   });
 });
 
