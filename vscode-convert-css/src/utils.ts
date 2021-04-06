@@ -4,6 +4,8 @@ export const matchStyledComponentFirstLine = (css: string) =>
   css.match(/(const )(.+)(= styled\.|styled\()([^\.|\(]+`)/);
 export const matchStyledComponentLastLine = (css: string) => css.match(/`;$/);
 
+export const hasTernary = (css: string) => css.match(/\s\?\s/g);
+
 export const convertStyledComponentFirstLine = (
   firstLine: string,
   containsProps: boolean
@@ -126,10 +128,9 @@ export const convertToStyleObject = (code: string): string => {
         .match(/^([+-]?([0-9]*)(\.([0-9]+))?)(?=;)/);
 
       if (cssPropertyWithInterpolation) {
-        const hasTernary = cssPropertyWithInterpolation[0].includes("?");
         convertedCssProperty = convertInterpolationProperty(
           cssPropertyWithInterpolation[0],
-          hasTernary
+          !!hasTernary(cssPropertyWithInterpolation[0])
         );
       }
       // convert css property to camelcase
@@ -151,7 +152,7 @@ export const convertToStyleObject = (code: string): string => {
         // if interpolation Property and no ternary, remove }; from css value.
         else if (
           cssPropertyWithInterpolation &&
-          !cssPropertyWithInterpolation?.[0].includes("?")
+          !hasTernary(cssPropertyWithInterpolation?.[0])
         ) {
           convertedCssValue = cssValue[0]
             .trim()
