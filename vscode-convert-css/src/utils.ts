@@ -6,6 +6,9 @@ export const matchStyledComponentLastLine = (css: string) => css.match(/`;$/);
 
 export const hasTernary = (css: string) => css.match(/\s\?\s/g);
 
+export const cssWithInterpolation = (css: string | undefined) =>
+  css?.match(/^(\${).+(})/);
+
 export const convertStyledComponentFirstLine = (
   firstLine: string,
   containsProps: boolean
@@ -74,10 +77,8 @@ export const convertToStyleObject = (code: string): string => {
 
       // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
       const htmlTag = css.match(/^((?!\:|,|\.|@|\$|>|~|\+|#)[a-z])*(\s?)(?={)/);
-      // Match characters up to (but not including) {: /(.+|\.?)([:&\.,]+).+(?={)/ --> this will match css selectors,
-      // like pseudo-selectors and classnames which need to be wrapped within quotes.
       const cssSelector = css.match(
-        /(.+|\.?)([:&\.,@,>,~,+,#]|(\s[a-z]\s?)+).+(?<!\$)(?={)/
+        /(.+|\.?)([:&\.,@,>,~,+,#]|(\s?[a-z]+\s?))\s?[a-z]+\s?(?={)/
       );
       const closingTag = css.match(/^[^\$]*?}/);
 
@@ -107,13 +108,15 @@ export const convertToStyleObject = (code: string): string => {
         );
       }
 
-      const cssPropertyWithInterpolation = css.match(/^(\${).+(})/);
+      const cssPropertyWithInterpolation = cssWithInterpolation(css);
       const cssProperty = css.match(/(?!&|:).+?(?=:)/);
       // (?:.(?!:))+$ will match only part after last colon, while (?<=:).* matches part after first colon.
       const cssValue = cssPropertyWithInterpolation
         ? css.match(/(?:.(?<!:))+$/)
         : css.match(/(?<=:).*/);
-      const propsCssValue = cssValue?.[0].match(/(props\.).+(?=})/);
+      const cssValueWithInterpolation = cssWithInterpolation(
+        cssValue?.[0]?.trim()
+      );
 
       console.log({ cssPropertyWithInterpolation });
       console.log({ cssProperty });
@@ -144,10 +147,15 @@ export const convertToStyleObject = (code: string): string => {
         convertedCssProperty = cssProperty[0];
       }
 
+      console.log({ cssValueWithInterpolation });
+
       if (cssValue) {
-        // cssValue containing props, like: ${props => props.primary};
-        if (propsCssValue) {
-          convertedCssValue = propsCssValue[0];
+        // cssValue containing interpolation function, like: ${props => props.primary};
+        if (cssValueWithInterpolation) {
+          convertedCssValue = cssValueWithInterpolation[0].replace(
+            /(?=\${)(.*?)(=>\s?)|(\${\(?props\)\s?=>\s?\(?)|\(|\)|}|/g,
+            ""
+          );
         }
         // if interpolation Property and no ternary, remove }; from css value.
         else if (
@@ -165,7 +173,7 @@ export const convertToStyleObject = (code: string): string => {
       if (
         (unitlessCssProperties.includes(convertedCssProperty.trim()) &&
           unitlessCssValue) ||
-        propsCssValue
+        cssValueWithInterpolation
       ) {
         return `${convertedCssProperty}: ${convertedCssValue},`;
       }
