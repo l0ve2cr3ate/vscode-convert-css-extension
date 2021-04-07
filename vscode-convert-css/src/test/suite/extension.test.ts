@@ -5,6 +5,7 @@ import {
   convertStyledComponentFirstLine,
   convertStyledComponentLastLine,
   convertToStyleObject,
+  cssWithInterpolation,
   hasTernary,
   matchStyledComponentFirstLine,
   matchStyledComponentLastLine,
@@ -363,6 +364,37 @@ suite("Tests for Extension Utils Regex", function () {
     const css = 'color: ${(props) => (props.primary ?? "purple")};';
 
     assert.strictEqual(!!hasTernary(css), false);
+  });
+
+  test("cssWithInterpolation should match for css value containing interpolation", function () {
+    const cssValue = '${(props) => (props.primary ?? "purple")}';
+    const match = cssWithInterpolation(cssValue);
+
+    assert.strictEqual(cssValue, match?.[0]);
+  });
+
+  test("cssWithInterpolation should match for css value containing interpolation with destructured props", function () {
+    const cssValue =
+      '${({ destructeredProp }) => (destructeredProp ? "green" : "purple")}';
+    const match = cssWithInterpolation(cssValue);
+
+    assert.strictEqual(cssValue, match?.[0]);
+  });
+
+  test("cssWithInterpolation should match for css property containing interpolation", function () {
+    const cssProperty =
+      '${(props) => props.vertical && "flex-direction: column;"}';
+    const match = cssWithInterpolation(cssProperty);
+
+    assert.strictEqual(cssProperty, match?.[0]);
+  });
+
+  test("cssWithInterpolation should match for css property containing interpolation with destructured props", function () {
+    const cssProperty =
+      '${({ vertical }) => vertical && "flex-direction: column;"}';
+    const match = cssWithInterpolation(cssProperty);
+
+    assert.strictEqual(cssProperty, match?.[0]);
   });
 });
 
