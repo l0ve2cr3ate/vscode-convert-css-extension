@@ -11,7 +11,8 @@ suite(
       const match = "const Button = styled.button({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        false
+        false,
+        null
       );
 
       assert.strictEqual(match, convertedCode);
@@ -22,7 +23,8 @@ suite(
       const match = "const Button = styled.button(props => ({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        true
+        true,
+        null
       );
 
       assert.strictEqual(match, convertedCode);
@@ -34,7 +36,8 @@ suite(
       const match = "const Button = styled.button<ButtonProps>({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        false
+        false,
+        null
       );
 
       assert.strictEqual(match, convertedCode);
@@ -46,7 +49,8 @@ suite(
       const match = "const Button = styled.button<ButtonProps>(props => ({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        true
+        true,
+        null
       );
 
       assert.strictEqual(match, convertedCode);
@@ -57,7 +61,8 @@ suite(
       const match = "const Button = styled(Button)({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        false
+        false,
+        null
       );
 
       assert.strictEqual(match, convertedCode);
@@ -68,7 +73,8 @@ suite(
       const match = "const Button = styled(Button)(props => ({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        true
+        true,
+        null
       );
 
       assert.strictEqual(match, convertedCode);
@@ -80,7 +86,8 @@ suite(
       const match = "const Button = styled(Btn)<ButtonProps>({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        false
+        false,
+        null
       );
 
       assert.strictEqual(match, convertedCode);
@@ -92,7 +99,25 @@ suite(
       const match = "const Button = styled(Btn)<ButtonProps>(props => ({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        true
+        true,
+        null
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
+    test("Should correctly convert styled component first line when destructured props are present", function () {
+      const destructuredProps: RegExpMatchArray = [
+        "destructuredProp",
+        "primary",
+      ];
+      const styledComponentFirstLine = "const DestructureTest = styled.div`";
+      const match =
+        "const DestructureTest = styled.div(({ destructuredProp, primary }) => ({";
+      const convertedCode = convertStyledComponentFirstLine(
+        styledComponentFirstLine,
+        false,
+        destructuredProps
       );
 
       assert.strictEqual(match, convertedCode);

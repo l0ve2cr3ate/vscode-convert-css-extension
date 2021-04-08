@@ -2,6 +2,7 @@ import * as assert from "assert";
 import {
   cssWithInterpolation,
   hasTernary,
+  matchDestructuredProps,
   matchStyledComponentFirstLine,
   matchStyledComponentLastLine,
 } from "../../utils";
@@ -133,5 +134,14 @@ suite("Tests for Extension Utils Regex", function () {
     const match = cssWithInterpolation(cssProperty);
 
     assert.strictEqual(cssProperty, match?.[0]);
+  });
+
+  test("matchDestructuredProps should match destructured props in code fragment", function () {
+    const code =
+      'const DestructureTest = styled.div`\n  color: ${({ destructuredProp }) => (destructuredProp ? "green" : "purple")};\n  background-color: ${({ primary }) => (primary ? "white" : "gray")};\n`;';
+    const destructuredProps = matchDestructuredProps(code);
+    const match = ["destructuredProp", "primary"];
+
+    assert.notStrictEqual(destructuredProps, match);
   });
 });
