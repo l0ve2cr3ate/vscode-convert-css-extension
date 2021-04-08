@@ -4,6 +4,9 @@ export const matchStyledComponentFirstLine = (css: string) =>
   css.match(/(const )(.+)(= styled\.|styled\()([^\.|\(]+`)/);
 export const matchStyledComponentLastLine = (css: string) => css.match(/`;$/);
 
+export const matchDestructuredProps = (code: string) =>
+  code.match(/(?<=\({\s?)([a-z-A-Z]+)(}\))?/g);
+
 export const hasTernary = (css: string) => css.match(/\s\?\s/g);
 
 export const cssWithInterpolation = (css: string | undefined) =>
@@ -11,10 +14,19 @@ export const cssWithInterpolation = (css: string | undefined) =>
 
 export const convertStyledComponentFirstLine = (
   firstLine: string,
-  containsProps: boolean
+  containsProps: boolean,
+  destructuredProps: RegExpMatchArray | null
 ) => {
   if (containsProps) {
     return firstLine.replace("`", "(props => ({");
+  } else if (destructuredProps) {
+    if (destructuredProps.length === 1) {
+      return firstLine.replace("`", `(({ ${destructuredProps} }) => ({`);
+    }
+    return firstLine.replace(
+      "`",
+      `(({ ${destructuredProps.join().replace(",", ", ")} }) => ({`
+    );
   }
   return firstLine.replace("`", "({");
 };
@@ -65,6 +77,9 @@ export const convertToStyleObject = (code: string): string => {
   let convertedCssProperty: string;
   let convertedCssValue: string;
   const containsProps: boolean = code.includes("props");
+  const destructuredProps: RegExpMatchArray | null = matchDestructuredProps(
+    code
+  );
 
   const convertedCode = cssLines
     .map((css) => {
@@ -85,7 +100,8 @@ export const convertToStyleObject = (code: string): string => {
       if (styledComponentFirstLine) {
         return convertStyledComponentFirstLine(
           styledComponentFirstLine[0],
-          containsProps
+          containsProps,
+          destructuredProps
         );
       }
 
