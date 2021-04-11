@@ -7,6 +7,9 @@ export const matchStyledComponentLastLine = (css: string) => css.match(/`;$/);
 export const matchDestructuredProps = (code: string) =>
   code.match(/(?<=\({\s?)([a-z-A-Z]+)(}\))?/g);
 
+export const matchCssSelector = (css: string) =>
+  css.match(/(.+|\.?)([:&\.,@,>,~,+,#]|(\s?[a-z]+\s?))\s?[a-z]+\s?(?={)/);
+
 export const hasTernary = (css: string) => css.match(/\s\?\s/g);
 
 export const cssWithInterpolation = (css: string | undefined) =>
@@ -92,9 +95,7 @@ export const convertToStyleObject = (code: string): string => {
 
       // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
       const htmlTag = css.match(/^((?!\:|,|\.|@|\$|>|~|\+|#)[a-z])*(\s?)(?={)/);
-      const cssSelector = css.match(
-        /(.+|\.?)([:&\.,@,>,~,+,#]|(\s?[a-z]+\s?))\s?[a-z]+\s?(?={)/
-      );
+      const cssSelector = matchCssSelector(css);
       const closingTag = css.match(/^[^\$]*?}/);
 
       if (styledComponentFirstLine) {
