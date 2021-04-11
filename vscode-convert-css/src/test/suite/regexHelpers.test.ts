@@ -2,6 +2,7 @@ import * as assert from "assert";
 import {
   cssWithInterpolation,
   hasTernary,
+  matchCssSelector,
   matchDestructuredProps,
   matchStyledComponentFirstLine,
   matchStyledComponentLastLine,
@@ -143,5 +144,45 @@ suite("Tests for Extension Utils Regex", function () {
     const match = ["destructuredProp", "primary"];
 
     assert.notStrictEqual(destructuredProps, match);
+  });
+
+  test("matchCssSelector should match single classname", function () {
+    const css = ".name {";
+    const match = ".name ";
+    const result = matchCssSelector(css);
+
+    assert.strictEqual(match, result?.[0]);
+  });
+
+  test("matchCssSelector should match multiple classnames", function () {
+    const css = ".firstName, .lastName {";
+    const match = ".firstName, .lastName ";
+    const result = matchCssSelector(css);
+
+    assert.strictEqual(match, result?.[0]);
+  });
+
+  test("matchCssSelector should match multiple htmlTags", function () {
+    const css = "article a {";
+    const match = "article a ";
+    const result = matchCssSelector(css);
+
+    assert.strictEqual(match, result?.[0]);
+  });
+
+  test("matchCssSelector should match pseudo-selector", function () {
+    const css = "::before {";
+    const match = "::before ";
+    const result = matchCssSelector(css);
+
+    assert.strictEqual(match, result?.[0]);
+  });
+
+  test("matchCssSelector should match child-selector", function () {
+    const css = "> a {";
+    const match = "> a ";
+    const result = matchCssSelector(css);
+
+    assert.strictEqual(match, result?.[0]);
   });
 });
