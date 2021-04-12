@@ -1,5 +1,7 @@
 import { unitlessCssProperties } from "./unitlessCssProperties";
 
+let quote: "single" | "double" = "double";
+
 export const matchStyledComponentFirstLine = (css: string) =>
   css.match(/(const )(.+)(= styled\.|styled\()([^\.|\(]+`)/);
 export const matchStyledComponentLastLine = (css: string) => css.match(/`;$/);
@@ -72,6 +74,23 @@ export const toCamelCase = (cssPropertyParts: string[]): string[] => {
   );
 };
 
+export const wrapWithQuotes = (value: string) => {
+  if (quote === "double") {
+    return `"${value}"`;
+  }
+
+  if (quote === "single") {
+    return `'${value}'`;
+  }
+};
+
+export const convertCssSelector = (css: string, singleHtmlTag?: boolean) => {
+  if (singleHtmlTag) {
+    return `${css.trim()}: {`;
+  }
+  return `${wrapWithQuotes(css.trim())}: {`;
+};
+
 export const convertToStyleObject = (code: string): string => {
   const cssLines = code.split("\n");
 
@@ -107,11 +126,11 @@ export const convertToStyleObject = (code: string): string => {
       }
 
       if (htmlTag) {
-        return `${htmlTag[0].trim()}: {`;
+        return convertCssSelector(htmlTag[0], true);
       }
 
       if (cssSelector) {
-        return `"${cssSelector[0].trim()}": {`;
+        return convertCssSelector(cssSelector[0]);
       }
 
       if (closingTag) {
