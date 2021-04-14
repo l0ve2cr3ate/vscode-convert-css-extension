@@ -1,6 +1,6 @@
 import * as assert from "assert";
 // import * as vscode from "vscode";
-import { convertToStyleObject } from "../../utils";
+import { convertToStyleObject } from "../../utils/conversionHelpers";
 
 suite("Tests for Extension Utils Convert to styleObject", function () {
   test("Should generate correct styleObject for css containing unitless values", function () {

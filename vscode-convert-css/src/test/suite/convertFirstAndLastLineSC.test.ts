@@ -2,7 +2,7 @@ import * as assert from "assert";
 import {
   convertStyledComponentFirstLine,
   convertStyledComponentLastLine,
-} from "../../utils";
+} from "../../utils/conversionHelpers";
 suite(
   "Tests for Extension Utils convert first and last line functions",
   function () {

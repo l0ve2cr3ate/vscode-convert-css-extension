@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { convertInterpolationProperty } from "../../utils";
+import { convertInterpolationProperty } from "../../utils/conversionHelpers";
 
 suite(
   "Tests for Extension Utils convert css interpolation property function",

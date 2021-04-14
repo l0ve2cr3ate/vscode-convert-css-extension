@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { wrapWithQuotes } from "../../utils";
+import { wrapWithQuotes } from "../../utils/conversionHelpers";
 
 suite("Extension Utils Tests for helper functions", function () {
   test("Should wrap css within quotes", function () {

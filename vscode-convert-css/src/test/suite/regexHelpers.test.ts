@@ -7,7 +7,7 @@ import {
   matchSingleHtmlTag,
   matchStyledComponentFirstLine,
   matchStyledComponentLastLine,
-} from "../../utils";
+} from "../../utils/regexHelpers";
 
 suite(
   "Tests for Extension Utils Regex matchStyledComponentFirstLine ",
@@ -18,12 +18,7 @@ suite(
 
       const result = matchStyledComponentFirstLine(css);
 
-      let matchResult;
-      if (result) {
-        matchResult = result[0];
-      }
-
-      assert.strictEqual(match, matchResult);
+      assert.strictEqual(match, result);
     });
 
     test("Should match styled component first line with typed props", function () {
@@ -32,12 +27,7 @@ suite(
 
       const result = matchStyledComponentFirstLine(css);
 
-      let matchResult;
-      if (result) {
-        matchResult = result[0];
-      }
-
-      assert.strictEqual(match, matchResult);
+      assert.strictEqual(match, result);
     });
 
     test("Should match styled component first line styling another component", function () {
@@ -45,17 +35,12 @@ suite(
       const match = "const Button = styled(Btn)`";
       const result = matchStyledComponentFirstLine(css);
 
-      let matchResult;
-      if (result) {
-        matchResult = result[0];
-      }
-
-      assert.strictEqual(match, matchResult);
+      assert.strictEqual(match, result);
     });
 
     test("Should not match something that looks like styled component first line", function () {
       const css = "const Button = styledBtn)`";
-      const match = null;
+      const match = undefined;
       const result = matchStyledComponentFirstLine(css);
 
       assert.strictEqual(match, result);
@@ -63,7 +48,7 @@ suite(
 
     test("Should not match styled component first line with typo", function () {
       const css = "const Button = styled.(Btn)`";
-      const match = null;
+      const match = undefined;
       const result = matchStyledComponentFirstLine(css);
 
       assert.strictEqual(match, result);
@@ -75,12 +60,7 @@ suite(
 
       const result = matchStyledComponentFirstLine(css);
 
-      let matchResult;
-      if (result) {
-        matchResult = result[0];
-      }
-
-      assert.strictEqual(match, matchResult);
+      assert.strictEqual(match, result);
     });
   }
 );
@@ -93,28 +73,23 @@ suite(
       const match = "`;";
       const result = matchStyledComponentLastLine(css);
 
-      let matchResult;
-      if (result) {
-        matchResult = result[0];
-      }
-
-      assert.strictEqual(match, matchResult);
+      assert.strictEqual(match, result);
     });
   }
 );
 
 suite("Tests for Extension Utils Regex hasTernary", function () {
-  test("!!hasTernary should return true for css property with ternary", function () {
+  test("hasTernary should return true for css property with ternary", function () {
     const css =
       '${({ vertical }) => (vertical ? "margin-top" : "margin-left")}: 1rem;';
 
-    assert.strictEqual(!!hasTernary(css), true);
+    assert.strictEqual(hasTernary(css), true);
   });
 
-  test("!!hasTernary should return false for css with nullish coalescing operator", function () {
+  test("hasTernary should return false for css with nullish coalescing operator", function () {
     const css = 'color: ${(props) => (props.primary ?? "purple")};';
 
-    assert.strictEqual(!!hasTernary(css), false);
+    assert.strictEqual(hasTernary(css), false);
   });
 });
 
@@ -123,7 +98,7 @@ suite("Tests for Extension Utils Regex cssWithInterpolation", function () {
     const cssValue = '${(props) => (props.primary ?? "purple")}';
     const match = cssWithInterpolation(cssValue);
 
-    assert.strictEqual(cssValue, match?.[0]);
+    assert.strictEqual(cssValue, match);
   });
 
   test("cssWithInterpolation should match for css value containing interpolation with destructured props", function () {
@@ -131,7 +106,7 @@ suite("Tests for Extension Utils Regex cssWithInterpolation", function () {
       '${({ destructeredProp }) => (destructeredProp ? "green" : "purple")}';
     const match = cssWithInterpolation(cssValue);
 
-    assert.strictEqual(cssValue, match?.[0]);
+    assert.strictEqual(cssValue, match);
   });
 
   test("cssWithInterpolation should match for css property containing interpolation", function () {
@@ -139,7 +114,7 @@ suite("Tests for Extension Utils Regex cssWithInterpolation", function () {
       '${(props) => props.vertical && "flex-direction: column;"}';
     const match = cssWithInterpolation(cssProperty);
 
-    assert.strictEqual(cssProperty, match?.[0]);
+    assert.strictEqual(cssProperty, match);
   });
 
   test("cssWithInterpolation should match for css property containing interpolation with destructured props", function () {
@@ -147,7 +122,7 @@ suite("Tests for Extension Utils Regex cssWithInterpolation", function () {
       '${({ vertical }) => vertical && "flex-direction: column;"}';
     const match = cssWithInterpolation(cssProperty);
 
-    assert.strictEqual(cssProperty, match?.[0]);
+    assert.strictEqual(cssProperty, match);
   });
 });
 
@@ -168,7 +143,7 @@ suite("Tests for Extension Utils Regex matchCssSelector", function () {
     const match = ".name ";
     const result = matchCssSelector(css);
 
-    assert.strictEqual(match, result?.[0]);
+    assert.strictEqual(match, result);
   });
 
   test("matchCssSelector should match multiple classnames", function () {
@@ -176,7 +151,7 @@ suite("Tests for Extension Utils Regex matchCssSelector", function () {
     const match = ".firstName, .lastName ";
     const result = matchCssSelector(css);
 
-    assert.strictEqual(match, result?.[0]);
+    assert.strictEqual(match, result);
   });
 
   test("matchCssSelector should match multiple htmlTags", function () {
@@ -184,7 +159,7 @@ suite("Tests for Extension Utils Regex matchCssSelector", function () {
     const match = "article a ";
     const result = matchCssSelector(css);
 
-    assert.strictEqual(match, result?.[0]);
+    assert.strictEqual(match, result);
   });
 
   test("matchCssSelector should match pseudo-selector", function () {
@@ -192,7 +167,7 @@ suite("Tests for Extension Utils Regex matchCssSelector", function () {
     const match = "::before ";
     const result = matchCssSelector(css);
 
-    assert.strictEqual(match, result?.[0]);
+    assert.strictEqual(match, result);
   });
 
   test("matchCssSelector should match child-selector", function () {
@@ -200,7 +175,7 @@ suite("Tests for Extension Utils Regex matchCssSelector", function () {
     const match = "> a ";
     const result = matchCssSelector(css);
 
-    assert.strictEqual(match, result?.[0]);
+    assert.strictEqual(match, result);
   });
 });
 

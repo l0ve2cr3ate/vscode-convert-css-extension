@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { toCamelCase } from "../../utils";
+import { toCamelCase } from "../../utils/conversionHelpers";
 
 suite("Extension Utils Tests for converting to camelCase", function () {
   test("Should generate correct camelCase for css property font-weight", function () {

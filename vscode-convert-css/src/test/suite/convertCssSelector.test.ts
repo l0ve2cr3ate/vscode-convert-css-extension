@@ -1,5 +1,5 @@
 import * as assert from "assert";
-import { convertCssSelector } from "../../utils";
+import { convertCssSelector } from "../../utils/conversionHelpers";
 
 suite("Extension Utils Tests for converting css selector", function () {
   test("Should generate correct css for single html tag", function () {
