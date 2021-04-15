@@ -133,7 +133,7 @@ suite("Tests for Extension Utils Regex matchDestructuredProps", function () {
     const destructuredProps = matchDestructuredProps(code);
     const match = ["destructuredProp", "primary"];
 
-    assert.notStrictEqual(destructuredProps, match);
+    assert.deepStrictEqual(destructuredProps, match);
   });
 });
 

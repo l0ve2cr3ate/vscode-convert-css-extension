@@ -11,8 +11,7 @@ suite(
       const match = "const Button = styled.button({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        false,
-        null
+        { containsProps: false, destructuredProps: null }
       );
 
       assert.strictEqual(match, convertedCode);
@@ -23,8 +22,7 @@ suite(
       const match = "const Button = styled.button(props => ({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        true,
-        null
+        { containsProps: true, destructuredProps: null }
       );
 
       assert.strictEqual(match, convertedCode);
@@ -36,8 +34,7 @@ suite(
       const match = "const Button = styled.button<ButtonProps>({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        false,
-        null
+        { containsProps: false, destructuredProps: null }
       );
 
       assert.strictEqual(match, convertedCode);
@@ -49,8 +46,7 @@ suite(
       const match = "const Button = styled.button<ButtonProps>(props => ({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        true,
-        null
+        { containsProps: true, destructuredProps: null }
       );
 
       assert.strictEqual(match, convertedCode);
@@ -61,8 +57,7 @@ suite(
       const match = "const Button = styled(Button)({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        false,
-        null
+        { containsProps: false, destructuredProps: null }
       );
 
       assert.strictEqual(match, convertedCode);
@@ -73,8 +68,7 @@ suite(
       const match = "const Button = styled(Button)(props => ({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        true,
-        null
+        { containsProps: true, destructuredProps: null }
       );
 
       assert.strictEqual(match, convertedCode);
@@ -86,8 +80,7 @@ suite(
       const match = "const Button = styled(Btn)<ButtonProps>({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        false,
-        null
+        { containsProps: false, destructuredProps: null }
       );
 
       assert.strictEqual(match, convertedCode);
@@ -99,8 +92,7 @@ suite(
       const match = "const Button = styled(Btn)<ButtonProps>(props => ({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        true,
-        null
+        { containsProps: true, destructuredProps: null }
       );
 
       assert.strictEqual(match, convertedCode);
@@ -116,8 +108,7 @@ suite(
         "const DestructureTest = styled.div(({ destructuredProp, primary }) => ({";
       const convertedCode = convertStyledComponentFirstLine(
         styledComponentFirstLine,
-        false,
-        destructuredProps
+        { containsProps: false, destructuredProps }
       );
 
       assert.strictEqual(match, convertedCode);

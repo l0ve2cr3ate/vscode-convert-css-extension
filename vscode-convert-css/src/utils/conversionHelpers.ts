@@ -11,15 +11,31 @@ import {
 
 let quote: "single" | "double" = "double";
 
+export type Props = {
+  containsProps: boolean;
+  destructuredProps: RegExpMatchArray | null;
+};
+
 export const convertStyledComponentFirstLine = (
   firstLine: string,
-  containsProps: boolean,
-  destructuredProps: RegExpMatchArray | null
+  props: Props
 ) => {
-  if (containsProps) {
+  const { containsProps, destructuredProps } = props;
+  if (containsProps && destructuredProps) {
+    if (destructuredProps?.length === 1) {
+      return firstLine.replace(
+        "`",
+        `(({ ${destructuredProps}, ...props }) => ({`
+      );
+    }
+    return firstLine.replace(
+      "`",
+      `(({ ${destructuredProps.join().replace(",", ", ")}, ...props }) => ({`
+    );
+  } else if (containsProps) {
     return firstLine.replace("`", "(props => ({");
   } else if (destructuredProps) {
-    if (destructuredProps.length === 1) {
+    if (destructuredProps?.length === 1) {
       return firstLine.replace("`", `(({ ${destructuredProps} }) => ({`);
     }
     return firstLine.replace(
@@ -78,6 +94,21 @@ export const wrapWithQuotes = (value: string) => {
   }
 };
 
+export const removeDuplicates = (arr: any[] | null) => {
+  if (arr) {
+    return [...new Set(...[arr])];
+  }
+  return null;
+};
+
+export const getProps = (
+  containsProps: boolean,
+  destructuredProps: RegExpMatchArray | null
+) => ({
+  containsProps,
+  destructuredProps,
+});
+
 export const convertCssSelector = (css: string, singleHtmlTag?: boolean) => {
   if (singleHtmlTag) {
     return `${css.trim()}: {`;
@@ -93,9 +124,11 @@ export const convertToStyleObject = (code: string): string => {
   let convertedCssProperty: string;
   let convertedCssValue: string;
   const containsProps: boolean = code.includes("props");
-  const destructuredProps: RegExpMatchArray | null = matchDestructuredProps(
-    code
+  const destructuredProps: RegExpMatchArray | null = removeDuplicates(
+    matchDestructuredProps(code)
   );
+
+  const props = getProps(containsProps, destructuredProps);
 
   const convertedCode = cssLines
     .map((css) => {
@@ -111,11 +144,7 @@ export const convertToStyleObject = (code: string): string => {
       const closingTag = css.match(/^[^\$]*?}/);
 
       if (styledComponentFirstLine) {
-        return convertStyledComponentFirstLine(
-          styledComponentFirstLine,
-          containsProps,
-          destructuredProps
-        );
+        return convertStyledComponentFirstLine(styledComponentFirstLine, props);
       }
 
       if (singleHtmlTag) {
@@ -137,7 +166,7 @@ export const convertToStyleObject = (code: string): string => {
         );
       }
 
-      const cssPropertyWithInterpolation = cssWithInterpolation(css);
+      const cssPropertyWithInterpolation = cssWithInterpolation(css.trim());
       const cssProperty = css.match(/(?!&|:).+?(?=:)/);
       // (?:.(?!:))+$ will match only part after last colon, while (?<=:).* matches part after first colon.
       const cssValue = cssPropertyWithInterpolation
@@ -182,7 +211,7 @@ export const convertToStyleObject = (code: string): string => {
         // cssValue containing interpolation function, like: ${props => props.primary};
         if (cssValueWithInterpolation) {
           convertedCssValue = cssValueWithInterpolation.replace(
-            /(?=\${)(.*?)(=>\s?)|(\${\(?props\)\s?=>\s?\(?)|\(|\)|}|/g,
+            /(?=\${)(.*?)(=>\s?)|(\${\(?props\)\s?=>\s?\(?)|\(|\)|}|\${/g,
             ""
           );
         }
