@@ -48,9 +48,13 @@ export const convertStyledComponentFirstLine = (
 
 export const convertStyledComponentLastLine = (
   lastLine: string,
-  containsProps: boolean
+  props: Props
 ) => {
-  if (containsProps) {
+  const { containsProps, destructuredProps } = props;
+  if (
+    containsProps ||
+    destructuredProps 
+  ) {
     return lastLine.replace("`", "}))");
   }
 
@@ -160,10 +164,7 @@ export const convertToStyleObject = (code: string): string => {
       }
 
       if (styledComponentLastLine) {
-        return convertStyledComponentLastLine(
-          styledComponentLastLine,
-          containsProps
-        );
+        return convertStyledComponentLastLine(styledComponentLastLine, props);
       }
 
       const cssPropertyWithInterpolation = cssWithInterpolation(css.trim());

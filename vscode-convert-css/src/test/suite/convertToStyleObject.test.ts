@@ -215,7 +215,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
     const code =
       'const DestructureTest = styled.div`\n  color: ${({ destructuredProp }) => (destructuredProp ? "green" : "purple")};\n  background-color: ${({ primary }) => (primary ? "white" : "gray")};\n`;';
     const styleObject =
-      'const DestructureTest = styled.div(({ destructuredProp, primary }) => ({\n  color: destructuredProp ? "green" : "purple",\n  backgroundColor: primary ? "white" : "gray",\n});';
+      'const DestructureTest = styled.div(({ destructuredProp, primary }) => ({\n  color: destructuredProp ? "green" : "purple",\n  backgroundColor: primary ? "white" : "gray",\n}));';
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);

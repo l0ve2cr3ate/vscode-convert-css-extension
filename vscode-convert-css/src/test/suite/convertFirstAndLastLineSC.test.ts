@@ -143,23 +143,45 @@ suite(
       assert.strictEqual(match, convertedCode);
     });
 
-    test("Should correctly convert styled component last line when no css props value is present", function () {
+    test("Should correctly convert styled component last line when no css props values are present", function () {
       const styledComponentLastLine = "`;";
       const match = "});";
       const convertedCode = convertStyledComponentLastLine(
         styledComponentLastLine,
-        false
+        { containsProps: false, destructuredProps: null }
       );
 
       assert.strictEqual(match, convertedCode);
     });
 
-    test("Should correctly convert styled component last line when css props value is present: ${props => props.primary}", function () {
+    test("Should correctly convert styled component last line when css props value is present: ${props => props.primary}, but destructured props are not", function () {
       const styledComponentLastLine = "`;";
       const match = "}));";
       const convertedCode = convertStyledComponentLastLine(
         styledComponentLastLine,
-        true
+        { containsProps: true, destructuredProps: null }
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
+    test("Should correctly convert styled component last line when css props value and destructured props are present", function () {
+      const styledComponentLastLine = "`;";
+      const match = "}));";
+      const convertedCode = convertStyledComponentLastLine(
+        styledComponentLastLine,
+        { containsProps: true, destructuredProps: ["destructuredProp"] }
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
+    test("Should correctly convert styled component last line when destructured props are present, and no other props are present", function () {
+      const styledComponentLastLine = "`;";
+      const match = "}));";
+      const convertedCode = convertStyledComponentLastLine(
+        styledComponentLastLine,
+        { containsProps: false, destructuredProps: ["destructuredProp"] }
       );
 
       assert.strictEqual(match, convertedCode);
