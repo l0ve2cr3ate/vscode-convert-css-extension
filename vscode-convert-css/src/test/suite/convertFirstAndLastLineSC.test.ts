@@ -114,6 +114,35 @@ suite(
       assert.strictEqual(match, convertedCode);
     });
 
+    test("Should correctly convert styled component first line when single destructured prop and not destructured props are present", function () {
+      const destructuredProps: RegExpMatchArray = ["singleDestructuredProp"];
+      const styledComponentFirstLine = "const DestructureTest = styled.div`";
+      const match =
+        "const DestructureTest = styled.div(({ singleDestructuredProp, ...props }) => ({";
+      const convertedCode = convertStyledComponentFirstLine(
+        styledComponentFirstLine,
+        { containsProps: true, destructuredProps }
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
+    test("Should correctly convert styled component first line when destructured props and not destructured props are present", function () {
+      const destructuredProps: RegExpMatchArray = [
+        "destructuredProp",
+        "primary",
+      ];
+      const styledComponentFirstLine = "const DestructureTest = styled.div`";
+      const match =
+        "const DestructureTest = styled.div(({ destructuredProp, primary, ...props }) => ({";
+      const convertedCode = convertStyledComponentFirstLine(
+        styledComponentFirstLine,
+        { containsProps: true, destructuredProps }
+      );
+
+      assert.strictEqual(match, convertedCode);
+    });
+
     test("Should correctly convert styled component last line when no css props value is present", function () {
       const styledComponentLastLine = "`;";
       const match = "});";
