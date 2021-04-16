@@ -22,12 +22,6 @@ export const convertStyledComponentFirstLine = (
 ) => {
   const { containsProps, destructuredProps } = props;
   if (containsProps && destructuredProps) {
-    if (destructuredProps?.length === 1) {
-      return firstLine.replace(
-        "`",
-        `(({ ${destructuredProps}, ...props }) => ({`
-      );
-    }
     return firstLine.replace(
       "`",
       `(({ ${destructuredProps.join().replace(",", ", ")}, ...props }) => ({`
@@ -35,9 +29,6 @@ export const convertStyledComponentFirstLine = (
   } else if (containsProps) {
     return firstLine.replace("`", "(props => ({");
   } else if (destructuredProps) {
-    if (destructuredProps?.length === 1) {
-      return firstLine.replace("`", `(({ ${destructuredProps} }) => ({`);
-    }
     return firstLine.replace(
       "`",
       `(({ ${destructuredProps.join().replace(",", ", ")} }) => ({`
@@ -51,10 +42,7 @@ export const convertStyledComponentLastLine = (
   props: Props
 ) => {
   const { containsProps, destructuredProps } = props;
-  if (
-    containsProps ||
-    destructuredProps 
-  ) {
+  if (containsProps || destructuredProps) {
     return lastLine.replace("`", "}))");
   }
 
