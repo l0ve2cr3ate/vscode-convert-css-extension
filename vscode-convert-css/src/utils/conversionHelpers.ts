@@ -2,6 +2,8 @@ import { unitlessCssProperties } from "./unitlessCssProperties";
 import {
   cssWithInterpolation,
   hasTernary,
+  matchClosingTag,
+  matchCssProperty,
   matchCssSelector,
   matchDestructuredProps,
   matchSingleHtmlTag,
@@ -101,6 +103,26 @@ export const getProps = (
   destructuredProps,
 });
 
+export const convertCssProperty = (
+  cssPropertyWithInterpolation: string | undefined,
+  cssProperty: string | undefined
+) => {
+  if (cssPropertyWithInterpolation) {
+    return convertInterpolationProperty(
+      cssPropertyWithInterpolation,
+      hasTernary(cssPropertyWithInterpolation)
+    );
+  }
+  // convert css property to camelcase
+  else if (cssProperty?.includes("-")) {
+    const cssPropertyParts = cssProperty.split("-");
+
+    return toCamelCase(cssPropertyParts).join(",").replace(/,/g, "");
+  } else if (cssProperty) {
+    return cssProperty;
+  }
+};
+
 export const convertCssSelector = (css: string, singleHtmlTag?: boolean) => {
   if (singleHtmlTag) {
     return `${css.trim()}: {`;
@@ -113,7 +135,6 @@ export const convertToStyleObject = (code: string): string => {
 
   console.log({ code });
 
-  let convertedCssProperty: string;
   let convertedCssValue: string;
   const containsProps: boolean = code.includes("props");
   const destructuredProps: RegExpMatchArray | null = removeDuplicates(
@@ -123,7 +144,7 @@ export const convertToStyleObject = (code: string): string => {
   const props = getProps(containsProps, destructuredProps);
 
   const convertedCode = cssLines
-    .map((css) => {
+    .map((css, index) => {
       if (css === "") return;
 
       console.log({ css });
@@ -133,7 +154,7 @@ export const convertToStyleObject = (code: string): string => {
 
       const singleHtmlTag = matchSingleHtmlTag(css);
       const cssSelector = matchCssSelector(css);
-      const closingTag = css.match(/^[^\$]*?}/);
+      const closingTag = matchClosingTag(css);
 
       if (styledComponentFirstLine) {
         return convertStyledComponentFirstLine(styledComponentFirstLine, props);
@@ -148,7 +169,7 @@ export const convertToStyleObject = (code: string): string => {
       }
 
       if (closingTag) {
-        return closingTag[0];
+        return `${closingTag},`;
       }
 
       if (styledComponentLastLine) {
@@ -156,7 +177,7 @@ export const convertToStyleObject = (code: string): string => {
       }
 
       const cssPropertyWithInterpolation = cssWithInterpolation(css.trim());
-      const cssProperty = css.match(/(?!&|:).+?(?=:)/);
+      const cssProperty = matchCssProperty(css);
       // (?:.(?!:))+$ will match only part after last colon, while (?<=:).* matches part after first colon.
       const cssValue = cssPropertyWithInterpolation
         ? css.match(/(?:.(?<!:))+$/)
@@ -177,22 +198,10 @@ export const convertToStyleObject = (code: string): string => {
         .trimStart()
         .match(/^([+-]?([0-9]*)(\.([0-9]+))?)(?=;)/);
 
-      if (cssPropertyWithInterpolation) {
-        convertedCssProperty = convertInterpolationProperty(
-          cssPropertyWithInterpolation,
-          hasTernary(cssPropertyWithInterpolation)
-        );
-      }
-      // convert css property to camelcase
-      else if (cssProperty && cssProperty[0].includes("-")) {
-        const cssPropertyParts = cssProperty[0].split("-");
-
-        convertedCssProperty = toCamelCase(cssPropertyParts)
-          .join(",")
-          .replace(/,/g, "");
-      } else if (cssProperty) {
-        convertedCssProperty = cssProperty[0];
-      }
+      const convertedCssProperty = convertCssProperty(
+        cssPropertyWithInterpolation,
+        cssProperty
+      );
 
       console.log({ cssValueWithInterpolation });
 
@@ -218,7 +227,7 @@ export const convertToStyleObject = (code: string): string => {
       }
 
       if (
-        (unitlessCssProperties.includes(convertedCssProperty.trim()) &&
+        (unitlessCssProperties.includes(convertedCssProperty!.trim()) &&
           unitlessCssValue) ||
         cssValueWithInterpolation
       ) {

@@ -24,7 +24,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
 
   test("Should generate correct styleObject for css containing htmlTag", function () {
     const code = "div {\n        margin: 1rem;\n    }";
-    const styleObject = 'div: {\n        margin: "1rem",\n    }';
+    const styleObject = 'div: {\n        margin: "1rem",\n    },';
     const convertedCode = convertToStyleObject(code);
 
     assert.strictEqual(styleObject, convertedCode);
@@ -32,7 +32,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
 
   test("Should generate correct styleObject for css containing classname", function () {
     const code = ".firstname {\n        color: purple;\n    }";
-    const styleObject = '".firstname": {\n        color: "purple",\n    }';
+    const styleObject = '".firstname": {\n        color: "purple",\n    },';
     const convertedCode = convertToStyleObject(code);
 
     assert.strictEqual(styleObject, convertedCode);
@@ -41,7 +41,8 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
   test("Should generate correct styleObject for css containing pseudo-element", function () {
     const code = "&:hover {\n        background-color: blue;\n    }";
 
-    const styleObject = '"&:hover": {\n        backgroundColor: "blue",\n    }';
+    const styleObject =
+      '"&:hover": {\n        backgroundColor: "blue",\n    },';
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
@@ -49,7 +50,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
 
   test("Should generate correct styleObject for css containing htmlTag and class", function () {
     const code = "article.name {\n    font-size: 16px;\n  }";
-    const styleObject = '"article.name": {\n    fontSize: "16px",\n  }';
+    const styleObject = '"article.name": {\n    fontSize: "16px",\n  },';
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
@@ -57,7 +58,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
 
   test("Should generate correct styleObject for css containing htmlTag and class", function () {
     const code = "article.name {\n    font-size: 16px;\n  }";
-    const styleObject = '"article.name": {\n    fontSize: "16px",\n  }';
+    const styleObject = '"article.name": {\n    fontSize: "16px",\n  },';
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
@@ -65,7 +66,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
 
   test("Should generate correct styleObject for css containing multiple htmlTags", function () {
     const code = " article, a {\n   color: #fff;\n }";
-    const styleObject = '"article, a": {\n   color: "#fff",\n }';
+    const styleObject = '"article, a": {\n   color: "#fff",\n },';
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
@@ -75,7 +76,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
     const code =
       "article a {\n    box-shadow: 10px 5px 5px red;\n    border-radius: 50%;\n  }";
     const styleObject =
-      '"article a": {\n    boxShadow: "10px 5px 5px red",\n    borderRadius: "50%",\n  }';
+      '"article a": {\n    boxShadow: "10px 5px 5px red",\n    borderRadius: "50%",\n  },';
     __proto__: Object;
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
@@ -83,7 +84,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
 
   test("Should generate correct styleObject for css containing multiple classes", function () {
     const code = ".firstname.something {\n   color: #fff;\n }";
-    const styleObject = '".firstname.something": {\n   color: "#fff",\n }';
+    const styleObject = '".firstname.something": {\n   color: "#fff",\n },';
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
@@ -91,7 +92,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
 
   test("Should generate correct styleObject for css containing child selector", function () {
     const code = "ul > li {\n   background-color: #eee;\n }";
-    const styleObject = '"ul > li": {\n   backgroundColor: "#eee",\n }';
+    const styleObject = '"ul > li": {\n   backgroundColor: "#eee",\n },';
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
@@ -99,7 +100,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
 
   test("Should generate correct styleObject for css containing sibling selector", function () {
     const code = "div + span {\n  margin: 1rem;\n}";
-    const styleObject = '"div + span": {\n  margin: "1rem",\n}';
+    const styleObject = '"div + span": {\n  margin: "1rem",\n},';
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
@@ -125,7 +126,7 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
     const code =
       "p {\n    background-color: blue;\n    font-size: 1rem;\n    \n    \n  }";
     const styleObject =
-      'p: {\n    backgroundColor: "blue",\n    fontSize: "1rem",\n\n\n  }';
+      'p: {\n    backgroundColor: "blue",\n    fontSize: "1rem",\n\n\n  },';
 
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);

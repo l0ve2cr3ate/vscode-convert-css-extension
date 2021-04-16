@@ -2,6 +2,8 @@ import * as assert from "assert";
 import {
   cssWithInterpolation,
   hasTernary,
+  matchClosingTag,
+  matchCssProperty,
   matchCssSelector,
   matchDestructuredProps,
   matchSingleHtmlTag,
@@ -224,6 +226,42 @@ suite("Tests for Extension Utils Regex matchSingleHtmlTag", function () {
     const css = "article .title {";
     const match = undefined;
     const result = matchSingleHtmlTag(css);
+
+    assert.strictEqual(match, result);
+  });
+});
+
+suite("Tests for Extension Utils Regex matchClosingTag", function () {
+  test("matchClosingTag should match css closing tag in css", function () {
+    const css = "  }";
+    const result = matchClosingTag(css);
+    const match = "  }";
+
+    assert.strictEqual(match, result);
+  });
+});
+
+suite("Tests for Extension Utils Regex matchCssProperty", function () {
+  test("matchCssProperty should match css property", function () {
+    const css =
+      'color: ${({ destructeredProp }) => (destructeredProp ? "green" : "purple")};';
+    const result = matchCssProperty(css);
+    const match = "color";
+
+    assert.strictEqual(match, result);
+  });
+  test("matchCssProperty should match vendor prefix css property", function () {
+    const css = "-webkit-background-clip: text;";
+    const result = matchCssProperty(css);
+    const match = "-webkit-background-clip";
+
+    assert.strictEqual(match, result);
+  });
+
+  test("matchCssProperty should match css property with containing hyphens", function () {
+    const css = "  grid-template-columns: 60px 60px;";
+    const result = matchCssProperty(css);
+    const match = "  grid-template-columns";
 
     assert.strictEqual(match, result);
   });

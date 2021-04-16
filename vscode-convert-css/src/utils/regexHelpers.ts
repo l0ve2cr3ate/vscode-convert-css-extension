@@ -17,3 +17,8 @@ export const hasTernary = (css: string) => css.match(/\s\?\s/g)?.length === 1;
 
 export const cssWithInterpolation = (css: string | undefined) =>
   css?.match(/^(\${).+(})/)?.[0];
+
+export const matchClosingTag = (css: string) => css.match(/^[^\$]*?}/)?.[0];
+
+export const matchCssProperty = (css: string) =>
+  css.match(/(?!&|:).+?(?=:)/)?.[0];
