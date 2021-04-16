@@ -220,4 +220,34 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
   });
+
+  test("Should generate correct styleObject for styled component destructured and non destructured props", function () {
+    const code =
+      'const Comp = styled.div`\n  color: ${({ destructeredProp }) => (destructeredProp ? "green" : "purple")};\n  background-color: ${(props) => (props.primary ? "white" : "gray")};\n  border-radius: ${({ destructeredProp }) => (destructeredProp ? 1 : 0)};\n`;';
+    const styleObject =
+      'const Comp = styled.div(({ destructeredProp, ...props }) => ({\n  color: destructeredProp ? "green" : "purple",\n  backgroundColor: props.primary ? "white" : "gray",\n  borderRadius: destructeredProp ? 1 : 0,\n}));';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for styled component containing variables", function () {
+    const code =
+      'const VariableExample = styled.div`\n  background-color: ${someVar};\n  ${someVar && "flex-direction: column;"};\n  ${anotherVar ? "margin-top" : "margin-left"}: 1rem;\n`;';
+    const styleObject =
+      'const VariableExample = styled.div({\n  backgroundColor: someVar,\n[`${someVar && "flex-direction"}`]: "column",\n[`${anotherVar ? "margin-top" : "margin-left"}`]: "1rem",\n});';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for styled component containing variables, destructured and non desctructured props", function () {
+    const code =
+      'const Comp = styled.div`\n  color: ${({ destructeredProp }) => (destructeredProp ? "green" : "purple")};\n  background-color: ${(props) => (props.primary ? "white" : "gray")};\n  border: ${border};\n`;';
+    const styleObject =
+      'const Comp = styled.div(({ destructeredProp, ...props }) => ({\n  color: destructeredProp ? "green" : "purple",\n  backgroundColor: props.primary ? "white" : "gray",\n  border: border,\n}));';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
 });
