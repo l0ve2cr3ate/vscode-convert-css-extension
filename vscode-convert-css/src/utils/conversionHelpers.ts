@@ -1,10 +1,11 @@
 import { unitlessCssProperties } from "./unitlessCssProperties";
 import {
-  cssWithInterpolation,
+  matchCssPropertyWithInterpolation,
   hasTernary,
   matchClosingTag,
   matchCssProperty,
   matchCssSelector,
+  matchCssValueWithInterpolation,
   matchDestructuredProps,
   matchSingleHtmlTag,
   matchStyledComponentFirstLine,
@@ -176,15 +177,15 @@ export const convertToStyleObject = (code: string): string => {
         return convertStyledComponentLastLine(styledComponentLastLine, props);
       }
 
-      const cssPropertyWithInterpolation = cssWithInterpolation(css.trim());
+      const cssPropertyWithInterpolation = matchCssPropertyWithInterpolation(
+        css.trim()
+      );
       const cssProperty = matchCssProperty(css);
       // (?:.(?!:))+$ will match only part after last colon, while (?<=:).* matches part after first colon.
       const cssValue = cssPropertyWithInterpolation
         ? css.match(/(?:.(?<!:))+$/)
         : css.match(/(?<=:).*/);
-      const cssValueWithInterpolation = cssWithInterpolation(
-        cssValue?.[0]?.trim()
-      );
+      const cssValueWithInterpolation = matchCssValueWithInterpolation(css);
 
       console.log({ cssPropertyWithInterpolation });
       console.log({ cssProperty });

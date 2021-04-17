@@ -1,6 +1,6 @@
 import * as assert from "assert";
 import {
-  cssWithInterpolation,
+  matchCssPropertyWithInterpolation,
   hasTernary,
   matchClosingTag,
   matchCssProperty,
@@ -9,6 +9,7 @@ import {
   matchSingleHtmlTag,
   matchStyledComponentFirstLine,
   matchStyledComponentLastLine,
+  matchCssValueWithInterpolation,
 } from "../../utils/regexHelpers";
 
 suite(
@@ -95,38 +96,52 @@ suite("Tests for Extension Utils Regex hasTernary", function () {
   });
 });
 
-suite("Tests for Extension Utils Regex cssWithInterpolation", function () {
-  test("cssWithInterpolation should match for css value containing interpolation", function () {
-    const cssValue = '${(props) => (props.primary ?? "purple")}';
-    const match = cssWithInterpolation(cssValue);
+suite("Tests for Extension Utils Regex matchCssProperty", function () {
+  test("matchCssProperty should match css property", function () {
+    const css =
+      'color: ${({ destructeredProp }) => (destructeredProp ? "green" : "purple")};';
+    const result = matchCssProperty(css);
+    const match = "color";
 
-    assert.strictEqual(cssValue, match);
+    assert.strictEqual(match, result);
+  });
+  test("matchCssProperty should match vendor prefix css property", function () {
+    const css = "-webkit-background-clip: text;";
+    const result = matchCssProperty(css);
+    const match = "-webkit-background-clip";
+
+    assert.strictEqual(match, result);
   });
 
-  test("cssWithInterpolation should match for css value containing interpolation with destructured props", function () {
-    const cssValue =
-      '${({ destructeredProp }) => (destructeredProp ? "green" : "purple")}';
-    const match = cssWithInterpolation(cssValue);
+  test("matchCssProperty should match css property with containing hyphens", function () {
+    const css = "  grid-template-columns: 60px 60px;";
+    const result = matchCssProperty(css);
+    const match = "  grid-template-columns";
 
-    assert.strictEqual(cssValue, match);
-  });
-
-  test("cssWithInterpolation should match for css property containing interpolation", function () {
-    const cssProperty =
-      '${(props) => props.vertical && "flex-direction: column;"}';
-    const match = cssWithInterpolation(cssProperty);
-
-    assert.strictEqual(cssProperty, match);
-  });
-
-  test("cssWithInterpolation should match for css property containing interpolation with destructured props", function () {
-    const cssProperty =
-      '${({ vertical }) => vertical && "flex-direction: column;"}';
-    const match = cssWithInterpolation(cssProperty);
-
-    assert.strictEqual(cssProperty, match);
+    assert.strictEqual(match, result);
   });
 });
+
+suite(
+  "Tests for Extension Utils Regex cssPropertyWithInterpolation",
+  function () {
+    test("cssPropertyWithInterpolation should match for css property containing interpolation", function () {
+      const cssProperty =
+        '${(props) => props.vertical && "flex-direction: column;"}';
+      const match = matchCssPropertyWithInterpolation(cssProperty);
+
+      assert.strictEqual(cssProperty, match);
+    });
+
+    test("cssPropertyWithInterpolation should match for css property containing interpolation with destructured props", function () {
+      const cssProperty =
+        '${({ vertical }) => vertical && "flex-direction: column;"}';
+      const match = matchCssPropertyWithInterpolation(cssProperty);
+
+      assert.strictEqual(cssProperty, match);
+    });
+  }
+);
 
 suite("Tests for Extension Utils Regex matchDestructuredProps", function () {
   test("matchDestructuredProps should match destructured props in code fragment", function () {
@@ -241,27 +256,46 @@ suite("Tests for Extension Utils Regex matchClosingTag", function () {
   });
 });
 
-suite("Tests for Extension Utils Regex matchCssProperty", function () {
-  test("matchCssProperty should match css property", function () {
+suite("Tests for Extension Utils Regex cssValueWithInterpolation", function () {
+  test("cssValueWithInterpolation should match for css value containing interpolation with variable", function () {
+    const css = "border: ${border};";
+    const result = matchCssValueWithInterpolation(css);
+    const match = "${border}";
+
+    assert.strictEqual(match, result);
+  });
+
+  test("cssValueWithInterpolation should match for css value containing interpolation with destructured props", function () {
+    const css = "  border: ${({ borderColor }) => `1px solid ${borderColor}`};";
+    const result = matchCssValueWithInterpolation(css);
+    const match = "${({ borderColor }) => `1px solid ${borderColor}`}";
+
+    assert.strictEqual(match, result);
+  });
+
+  test("cssValueWithInterpolation should match for css value containing interpolation with variable + part css (1px solid ${borderColor})", function () {
+    const css = "  border: 1px solid ${borderColor};";
+    const result = matchCssValueWithInterpolation(css);
+    const match = "1px solid ${borderColor}";
+
+    assert.strictEqual(match, result);
+  });
+
+  test("cssValueWithInterpolation should match for css value containing interpolation with destructured props and ternary", function () {
     const css =
       'color: ${({ destructeredProp }) => (destructeredProp ? "green" : "purple")};';
-    const result = matchCssProperty(css);
-    const match = "color";
-
-    assert.strictEqual(match, result);
-  });
-  test("matchCssProperty should match vendor prefix css property", function () {
-    const css = "-webkit-background-clip: text;";
-    const result = matchCssProperty(css);
-    const match = "-webkit-background-clip";
+    const result = matchCssValueWithInterpolation(css);
+    const match =
+      '${({ destructeredProp }) => (destructeredProp ? "green" : "purple")}';
 
     assert.strictEqual(match, result);
   });
 
-  test("matchCssProperty should match css property with containing hyphens", function () {
-    const css = "  grid-template-columns: 60px 60px;";
-    const result = matchCssProperty(css);
-    const match = "  grid-template-columns";
+  test("cssValueWithInterpolation should match for css value containing interpolation with props and ternary", function () {
+    const css =
+      '  background-color: ${(props) => (props.primary ? "white" : "gray")};';
+    const result = matchCssValueWithInterpolation(css);
+    const match = '${(props) => (props.primary ? "white" : "gray")}';
 
     assert.strictEqual(match, result);
   });
