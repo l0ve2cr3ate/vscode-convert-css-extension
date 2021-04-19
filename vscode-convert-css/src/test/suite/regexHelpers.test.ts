@@ -10,6 +10,8 @@ import {
   matchStyledComponentFirstLine,
   matchStyledComponentLastLine,
   matchCssValueWithInterpolation,
+  matchInterpolationWithBackticks,
+  startsAndEndsWithInterpolation,
 } from "../../utils/regexHelpers";
 
 suite(
@@ -153,6 +155,46 @@ suite("Tests for Extension Utils Regex matchDestructuredProps", function () {
     assert.deepStrictEqual(destructuredProps, match);
   });
 });
+
+suite(
+  "Tests for Extension Utils Regex matchInterpolationWithBackticks",
+  function () {
+    test("matchInterpolationWithBackticks should match css value with interpolation containing backticks and props", function () {
+      const css = "border: ${(props) => `1px solid ${props.borderColor}`};";
+      const result = matchInterpolationWithBackticks(css);
+      const match = "${(props) => `1px solid ${props.borderColor}`}";
+
+      assert.deepStrictEqual(result, match);
+    });
+
+    test("matchDestructuredProps should match css value with interpolation containing backticks and props", function () {
+      const css = "border: ${({ borderColor }) => `1px solid ${borderColor}`};";
+      const result = matchInterpolationWithBackticks(css);
+      const match = "${({ borderColor }) => `1px solid ${borderColor}`}";
+
+      assert.deepStrictEqual(result, match);
+    });
+  }
+);
+
+suite(
+  "Tests for Extension Utils Regex startsAndEndsWithInterpolation",
+  function () {
+    test("startsAndEndsWithInterpolation should return false for css value containing partial interpolation and partial css", function () {
+      const css = "1px solid ${borderColor};";
+      const result = startsAndEndsWithInterpolation(css);
+
+      assert.deepStrictEqual(result, false);
+    });
+
+    test("startsAndEndsWithInterpolation should return true for full css interpolation value", function () {
+      const css = "${({ borderColor }) => `1px solid ${borderColor}`};";
+      const result = startsAndEndsWithInterpolation(css);
+
+      assert.deepStrictEqual(result, true);
+    });
+  }
+);
 
 suite("Tests for Extension Utils Regex matchCssSelector", function () {
   test("matchCssSelector should match single classname", function () {

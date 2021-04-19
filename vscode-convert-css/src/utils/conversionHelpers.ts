@@ -226,10 +226,12 @@ export const convertToStyleObject = (code: string): string => {
               ""
             );
           } else {
-            convertedCssValue = cssValueWithInterpolation.replace(
-              /(?=\${)(.*?)(=>\s?)|(\${\(?props\)\s?=>\s?\(?)|\(|\)|}|\${/g,
-              ""
-            );
+            convertedCssValue = cssValueWithInterpolation
+              .replace(
+                /(?=\${)(.*?)(=>\s?\()([a-zA-Z0-9,.,?,\",\s,:]+)\)?|(?=\${)(.*?)(=>\s?\(?)/,
+                "$3"
+              )
+              .replace(/^(\${)|(}?;?\s*?)$/g, "");
           }
         }
         // if interpolation Property and no ternary, remove }; from css value.

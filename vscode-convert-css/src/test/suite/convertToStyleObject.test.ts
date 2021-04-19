@@ -251,4 +251,43 @@ suite("Tests for Extension Utils Convert to styleObject", function () {
     const convertedCode = convertToStyleObject(code);
     assert.strictEqual(styleObject, convertedCode);
   });
+
+  test("Should generate correct styleObject for styled component containing css interpolation with backticks", function () {
+    const code =
+      "const Comp = styled.div`\n  border: ${({ borderColor }) => `1px solid ${borderColor}`};\n`;";
+    const styleObject =
+      "const Comp = styled.div(({ borderColor }) => ({\n  border: `1px solid ${borderColor}`,\n}));";
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for styled component containing partial css interpolation and partial css", function () {
+    const code =
+      "const Comp = styled.div`\n  border: 1px solid ${borderColor};\n`;";
+    const styleObject =
+      "const Comp = styled.div({\n  border: `1px solid ${borderColor}`,\n});";
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for styled component containing interpolation with a function as desctructured prop", function () {
+    const code =
+      'const Comp1 = styled.div`\n  color: ${({ getColor }) => getColor("blue")};\n`;';
+    const styleObject =
+      'const Comp1 = styled.div(({ getColor }) => ({\n  color: getColor("blue"),\n}));';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
+
+  test("Should generate correct styleObject for styled component containing interpolation with a function", function () {
+    const code = 'const Comp1 = styled.div`\n  color: ${getColor("blue")};\n`;';
+    const styleObject =
+      'const Comp1 = styled.div({\n  color: getColor("blue"),\n});';
+
+    const convertedCode = convertToStyleObject(code);
+    assert.strictEqual(styleObject, convertedCode);
+  });
 });
