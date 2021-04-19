@@ -10,6 +10,8 @@ import {
   matchSingleHtmlTag,
   matchStyledComponentFirstLine,
   matchStyledComponentLastLine,
+  matchInterpolationWithBackticks,
+  startsAndEndsWithInterpolation,
 } from "./regexHelpers";
 
 let quote: "single" | "double" = "double";
@@ -186,6 +188,9 @@ export const convertToStyleObject = (code: string): string => {
         ? css.match(/(?:.(?<!:))+$/)
         : css.match(/(?<=:).*/);
       const cssValueWithInterpolation = matchCssValueWithInterpolation(css);
+      const cssValueWithInterpolationBackticks = matchInterpolationWithBackticks(
+        css
+      );
 
       console.log({ cssPropertyWithInterpolation });
       console.log({ cssProperty });
@@ -209,10 +214,23 @@ export const convertToStyleObject = (code: string): string => {
       if (cssValue) {
         // cssValue containing interpolation function, like: ${props => props.primary};
         if (cssValueWithInterpolation) {
-          convertedCssValue = cssValueWithInterpolation.replace(
-            /(?=\${)(.*?)(=>\s?)|(\${\(?props\)\s?=>\s?\(?)|\(|\)|}|\${/g,
-            ""
-          );
+          // check for css syntax like: 1px solid ${borderColor};
+          if (
+            !startsAndEndsWithInterpolation(cssValueWithInterpolation.trim())
+          ) {
+            convertedCssValue = `\`${cssValueWithInterpolation}\``;
+            // check for syntax like: border: ${(props) => `1px solid ${props.borderColor}`};
+          } else if (cssValueWithInterpolationBackticks) {
+            convertedCssValue = cssValueWithInterpolationBackticks.replace(
+              /(?=\${)(.*?)(=>\s?)|(\${\(?props\)\s?=>\s?\(?)|(};?\s*?)$/g,
+              ""
+            );
+          } else {
+            convertedCssValue = cssValueWithInterpolation.replace(
+              /(?=\${)(.*?)(=>\s?)|(\${\(?props\)\s?=>\s?\(?)|\(|\)|}|\${/g,
+              ""
+            );
+          }
         }
         // if interpolation Property and no ternary, remove }; from css value.
         else if (

@@ -21,6 +21,13 @@ export const matchCssPropertyWithInterpolation = (css: string) =>
 export const matchCssValueWithInterpolation = (css: string) =>
   css.match(/(?<=:\s).*(\${).+(})/)?.[0];
 
+// partial interpolation, partial css containing backticks, for syntax like: ${(props) => `1px solid ${props.borderColor}`}
+export const matchInterpolationWithBackticks = (css: string) =>
+  css.match(/(\${).+(\${).+(})/)?.[0];
+
+export const startsAndEndsWithInterpolation = (css: string) =>
+  css.match(/^(\${).+(};?\s?)$/g)?.length === 1;
+
 export const matchClosingTag = (css: string) => css.match(/^[^\$]*?}/)?.[0];
 
 export const matchCssProperty = (css: string) =>
