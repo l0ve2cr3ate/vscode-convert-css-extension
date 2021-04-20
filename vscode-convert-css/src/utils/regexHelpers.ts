@@ -32,3 +32,12 @@ export const matchClosingTag = (css: string) => css.match(/^[^\$]*?}/)?.[0];
 
 export const matchCssProperty = (css: string) =>
   css.match(/(?!&|:).+?(?=:)/)?.[0];
+
+// (?:.(?!:))+$ will match only part after last colon, while (?<=:).* matches part after first colon.
+export const matchCssValue = (
+  css: string,
+  cssPropertyWithInterpolation: boolean
+) =>
+  cssPropertyWithInterpolation
+    ? css.match(/(?:.(?<!:))+$/)?.[0]
+    : css.match(/(?<=:).*/)?.[0];

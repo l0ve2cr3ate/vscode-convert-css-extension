@@ -12,6 +12,7 @@ import {
   matchCssValueWithInterpolation,
   matchInterpolationWithBackticks,
   startsAndEndsWithInterpolation,
+  matchCssValue,
 } from "../../utils/regexHelpers";
 
 suite(
@@ -195,6 +196,25 @@ suite(
     });
   }
 );
+
+suite("Tests for Extension Utils Regex matchCssProperty", function () {
+  test("matchCssValue should match css after first colon when cssPropertyWithInterpolation is false", function () {
+    const css = "border: 1px solid ${borderColor};";
+    const result = matchCssValue(css, false);
+    const match = " 1px solid ${borderColor};";
+
+    assert.strictEqual(result, match);
+  });
+
+  test("matchCssValue should match css after last colon when cssPropertyWithInterpolation is true", function () {
+    const css =
+      '${(props) => (props.vertical ? "margin-top" : "margin-left")}: 1rem;';
+    const result = matchCssValue(css, true);
+    const match = " 1rem;";
+
+    assert.strictEqual(result, match);
+  });
+});
 
 suite("Tests for Extension Utils Regex matchCssSelector", function () {
   test("matchCssSelector should match single classname", function () {

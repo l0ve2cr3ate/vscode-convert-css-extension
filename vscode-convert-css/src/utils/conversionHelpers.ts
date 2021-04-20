@@ -12,6 +12,7 @@ import {
   matchStyledComponentLastLine,
   matchInterpolationWithBackticks,
   startsAndEndsWithInterpolation,
+  matchCssValue,
 } from "./regexHelpers";
 
 let quote: "single" | "double" = "double";
@@ -147,7 +148,7 @@ export const convertToStyleObject = (code: string): string => {
   const props = getProps(containsProps, destructuredProps);
 
   const convertedCode = cssLines
-    .map((css, index) => {
+    .map((css) => {
       if (css === "") return;
 
       console.log({ css });
@@ -183,10 +184,8 @@ export const convertToStyleObject = (code: string): string => {
         css.trim()
       );
       const cssProperty = matchCssProperty(css);
-      // (?:.(?!:))+$ will match only part after last colon, while (?<=:).* matches part after first colon.
-      const cssValue = cssPropertyWithInterpolation
-        ? css.match(/(?:.(?<!:))+$/)
-        : css.match(/(?<=:).*/);
+
+      const cssValue = matchCssValue(css, !!cssPropertyWithInterpolation);
       const cssValueWithInterpolation = matchCssValueWithInterpolation(css);
       const cssValueWithInterpolationBackticks = matchInterpolationWithBackticks(
         css
@@ -200,8 +199,8 @@ export const convertToStyleObject = (code: string): string => {
         return;
       }
 
-      const unitlessCssValue = cssValue?.[0]
-        .trimStart()
+      const unitlessCssValue = cssValue
+        ?.trimStart()
         .match(/^([+-]?([0-9]*)(\.([0-9]+))?)(?=;)/);
 
       const convertedCssProperty = convertCssProperty(
@@ -234,16 +233,14 @@ export const convertToStyleObject = (code: string): string => {
               .replace(/^(\${)|(}?;?\s*?)$/g, "");
           }
         }
-        // if interpolation Property and no ternary, remove }; from css value.
+        // if interpolation property and no ternary, remove }; from css value.
         else if (
           cssPropertyWithInterpolation &&
           !hasTernary(cssPropertyWithInterpolation)
         ) {
-          convertedCssValue = cssValue[0]
-            .trim()
-            .replace(/(;?)("?)('?)(}?)/g, "");
+          convertedCssValue = cssValue.trim().replace(/(;?)("?)('?)(}?)/g, "");
         } else {
-          convertedCssValue = cssValue[0].trim().replace(";", "");
+          convertedCssValue = cssValue.trim().replace(";", "");
         }
       }
 
