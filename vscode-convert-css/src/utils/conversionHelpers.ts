@@ -108,6 +108,11 @@ export const getProps = (
   destructuredProps,
 });
 
+export const isUnitlessCssProperty = (
+  unitlessCssProperties: string[],
+  cssProperty: string
+) => unitlessCssProperties.includes(cssProperty);
+
 export const convertCssProperty = (
   cssPropertyWithInterpolation: string | undefined,
   cssProperty: string | undefined
@@ -200,11 +205,15 @@ export const convertToStyleObject = (code: string): string => {
         return;
       }
 
-      const unitlessCssValue = isUnitlessCssValue(cssValue);
-
       const convertedCssProperty = convertCssProperty(
         cssPropertyWithInterpolation,
         cssProperty
+      );
+
+      const unitlessCssValue = isUnitlessCssValue(cssValue);
+      const unitlessCssProperty = isUnitlessCssProperty(
+        unitlessCssProperties,
+        convertedCssProperty!.trim()
       );
 
       console.log({ cssValueWithInterpolation });
@@ -244,8 +253,7 @@ export const convertToStyleObject = (code: string): string => {
       }
 
       if (
-        (unitlessCssProperties.includes(convertedCssProperty!.trim()) &&
-          unitlessCssValue) ||
+        (unitlessCssProperty && unitlessCssValue) ||
         cssValueWithInterpolation
       ) {
         return `${convertedCssProperty}: ${convertedCssValue},`;

@@ -1,9 +1,11 @@
 import * as assert from "assert";
 import {
   getProps,
+  isUnitlessCssProperty,
   removeDuplicates,
   wrapWithQuotes,
 } from "../../utils/conversionHelpers";
+import { unitlessCssProperties } from "../../utils/unitlessCssProperties";
 
 suite("Extension Utils Tests for wrapWithQuotes function", function () {
   test("Should wrap css within quotes", function () {
@@ -49,4 +51,29 @@ suite("Extension Utils Tests for getProps function", function () {
 
     assert.deepStrictEqual(props, result);
   });
+
+  suite(
+    "Extension Utils Tests for isUnitlessCssProperty function",
+    function () {
+      test("Should return true for unitless css property", function () {
+        const cssProperty = `zIndex`;
+        const result = isUnitlessCssProperty(
+          unitlessCssProperties,
+          cssProperty
+        );
+
+        assert.strictEqual(result, true);
+      });
+
+      test("Should return false for css properties with units", function () {
+        const cssProperty = `fontSize`;
+        const result = isUnitlessCssProperty(
+          unitlessCssProperties,
+          cssProperty
+        );
+
+        assert.strictEqual(result, false);
+      });
+    }
+  );
 });
