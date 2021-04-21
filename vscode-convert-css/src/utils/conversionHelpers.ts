@@ -13,6 +13,7 @@ import {
   matchInterpolationWithBackticks,
   startsAndEndsWithInterpolation,
   matchCssValue,
+  isUnitlessCssValue,
 } from "./regexHelpers";
 
 let quote: "single" | "double" = "double";
@@ -199,9 +200,7 @@ export const convertToStyleObject = (code: string): string => {
         return;
       }
 
-      const unitlessCssValue = cssValue
-        ?.trimStart()
-        .match(/^([+-]?([0-9]*)(\.([0-9]+))?)(?=;)/);
+      const unitlessCssValue = isUnitlessCssValue(cssValue);
 
       const convertedCssProperty = convertCssProperty(
         cssPropertyWithInterpolation,

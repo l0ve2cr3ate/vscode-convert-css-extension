@@ -41,3 +41,7 @@ export const matchCssValue = (
   cssPropertyWithInterpolation
     ? css.match(/(?:.(?<!:))+$/)?.[0]
     : css.match(/(?<=:).*/)?.[0];
+
+export const isUnitlessCssValue = (cssValue: string) =>
+  cssValue?.trimStart().match(/^([+-]?([0-9]*)(\.([0-9]+))?)(?=;)/g)?.length ===
+  1;

@@ -13,6 +13,7 @@ import {
   matchInterpolationWithBackticks,
   startsAndEndsWithInterpolation,
   matchCssValue,
+  isUnitlessCssValue,
 } from "../../utils/regexHelpers";
 
 suite(
@@ -315,6 +316,22 @@ suite("Tests for Extension Utils Regex matchClosingTag", function () {
     const match = "  }";
 
     assert.strictEqual(match, result);
+  });
+});
+
+suite("Tests for Extension Utils Regex isUnitlessCssValue", function () {
+  test("isUnitlessCssValue should return true for css value without unit", function () {
+    const cssValue = "1;";
+    const result = isUnitlessCssValue(cssValue);
+
+    assert.strictEqual(result, true);
+  });
+
+  test("isUnitlessCssValue should return false for css value with unit", function () {
+    const cssValue = "12px;";
+    const result = isUnitlessCssValue(cssValue);
+
+    assert.strictEqual(result, false);
   });
 });
 
