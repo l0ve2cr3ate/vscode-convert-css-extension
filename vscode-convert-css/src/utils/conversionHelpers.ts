@@ -140,12 +140,48 @@ export const convertCssSelector = (css: string, singleHtmlTag?: boolean) => {
   return `${wrapWithQuotes(css.trim())}: {`;
 };
 
+export const convertCssValue = (
+  cssValue: string,
+  cssValueWithInterpolation: string | undefined,
+  cssValueWithInterpolationBackticks: string | undefined,
+  cssPropertyWithInterpolation: string | undefined
+) => {
+  // cssValue containing interpolation function, like: ${props => props.primary};
+  if (cssValueWithInterpolation) {
+    // check for css syntax like: 1px solid ${borderColor};
+    if (!startsAndEndsWithInterpolation(cssValueWithInterpolation.trim())) {
+      return `\`${cssValueWithInterpolation}\``;
+      // check for syntax like: border: ${(props) => `1px solid ${props.borderColor}`};
+    } else if (cssValueWithInterpolationBackticks) {
+      return cssValueWithInterpolationBackticks.replace(
+        /(?=\${)(.*?)(=>\s?)|(\${\(?props\)\s?=>\s?\(?)|(};?\s*?)$/g,
+        ""
+      );
+    } else {
+      return cssValueWithInterpolation
+        .replace(
+          /(?=\${)(.*?)(=>\s?\()([a-zA-Z0-9,.,?,\",\s,:]+)\)?|(?=\${)(.*?)(=>\s?\(?)/,
+          "$3"
+        )
+        .replace(/^(\${)|(}?;?\s*?)$/g, "");
+    }
+  }
+  // if interpolation property and no ternary, remove }; from css value.
+  else if (
+    cssPropertyWithInterpolation &&
+    !hasTernary(cssPropertyWithInterpolation)
+  ) {
+    return cssValue.trim().replace(/(;?)("?)('?)(}?)/g, "");
+  } else {
+    return cssValue.trim().replace(";", "");
+  }
+};
+
 export const convertToStyleObject = (code: string): string => {
   const cssLines = code.split("\n");
 
   console.log({ code });
 
-  let convertedCssValue: string;
   const containsProps: boolean = code.includes("props");
   const destructuredProps: RegExpMatchArray | null = removeDuplicates(
     matchDestructuredProps(code)
@@ -218,39 +254,12 @@ export const convertToStyleObject = (code: string): string => {
 
       console.log({ cssValueWithInterpolation });
 
-      if (cssValue) {
-        // cssValue containing interpolation function, like: ${props => props.primary};
-        if (cssValueWithInterpolation) {
-          // check for css syntax like: 1px solid ${borderColor};
-          if (
-            !startsAndEndsWithInterpolation(cssValueWithInterpolation.trim())
-          ) {
-            convertedCssValue = `\`${cssValueWithInterpolation}\``;
-            // check for syntax like: border: ${(props) => `1px solid ${props.borderColor}`};
-          } else if (cssValueWithInterpolationBackticks) {
-            convertedCssValue = cssValueWithInterpolationBackticks.replace(
-              /(?=\${)(.*?)(=>\s?)|(\${\(?props\)\s?=>\s?\(?)|(};?\s*?)$/g,
-              ""
-            );
-          } else {
-            convertedCssValue = cssValueWithInterpolation
-              .replace(
-                /(?=\${)(.*?)(=>\s?\()([a-zA-Z0-9,.,?,\",\s,:]+)\)?|(?=\${)(.*?)(=>\s?\(?)/,
-                "$3"
-              )
-              .replace(/^(\${)|(}?;?\s*?)$/g, "");
-          }
-        }
-        // if interpolation property and no ternary, remove }; from css value.
-        else if (
-          cssPropertyWithInterpolation &&
-          !hasTernary(cssPropertyWithInterpolation)
-        ) {
-          convertedCssValue = cssValue.trim().replace(/(;?)("?)('?)(}?)/g, "");
-        } else {
-          convertedCssValue = cssValue.trim().replace(";", "");
-        }
-      }
+      const convertedCssValue = convertCssValue(
+        cssValue,
+        cssValueWithInterpolation,
+        cssValueWithInterpolationBackticks,
+        cssPropertyWithInterpolation
+      );
 
       if (
         (unitlessCssProperty && unitlessCssValue) ||
