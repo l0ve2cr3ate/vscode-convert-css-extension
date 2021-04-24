@@ -198,7 +198,7 @@ export const convertToStyleObject = (code: string): string => {
       const styledComponentFirstLine = matchStyledComponentFirstLine(css);
       const styledComponentLastLine = matchStyledComponentLastLine(css);
 
-      const singleHtmlTag = matchSingleHtmlTag(css);
+      const singleHtmlTag = matchSingleHtmlTag(css.trimStart());
       const cssSelector = matchCssSelector(css);
       const closingTag = matchClosingTag(css);
 
@@ -209,6 +209,9 @@ export const convertToStyleObject = (code: string): string => {
       if (singleHtmlTag) {
         return convertCssSelector(singleHtmlTag, true);
       }
+
+      console.log({ singleHtmlTag });
+      console.log({ cssSelector });
 
       if (cssSelector) {
         return convertCssSelector(cssSelector);

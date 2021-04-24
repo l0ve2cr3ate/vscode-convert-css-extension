@@ -8,7 +8,7 @@ export const matchDestructuredProps = (code: string) =>
 
 // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
 export const matchSingleHtmlTag = (css: string) =>
-  css.match(/^((?!\:|,|\.|@|\$|>|~|\+|#)[a-z])*(\s?)(?={)/)?.[0];
+  css.match(/^((?!\:|,|\.|@|\$|>|~|\+|#)[a-z])*(\s?)(?={)/g)?.[0];
 
 export const matchCssSelector = (css: string) =>
   css.match(/(.+|\.?)([:&\.,@,>,~,+,#]|(\s?[a-z]+\s?))\s?[a-z]+\s?(?={)/)?.[0];
