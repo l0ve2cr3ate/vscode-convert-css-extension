@@ -10,20 +10,24 @@
 		"Other"
 	],
 	"activationEvents": [
-		"onCommand:vscode-convert-css.helloWorld",
 		"onCommand:vscode-convert-css.convertToStyleObject"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
 		"commands": [
 			{
-				"command": "vscode-convert-css.helloWorld",
-				"title": "Hello World"
-			},
-			{
                 "command": "vscode-convert-css.convertToStyleObject",
                 "title": "Convert To Style Object"
             }
+		],
+		"keybindings": [
+			{
+				"command": "vscode-convert-css.convertToStyleObject",
+				"key": "shift+cmd+k",
+				"mac": "shift+cmd+k",
+				"win": "shift+ctrl+k",
+				"linux": "shift+ctrl+k"
+			}
 		]
 	},
 	"scripts": {
