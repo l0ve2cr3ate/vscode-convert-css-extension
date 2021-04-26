@@ -280,6 +280,49 @@ export const convertToStyleObject = (code: string): string => {
 };
 
 // convert camelcase to kebabcase: https://gist.github.com/nblackburn/875e6ff75bc8ce171c758bf75f304707
-// const updatedCode = convertedCode
-//   .replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, "$1-$2")
-//   .toLowerCase();
+export const toKebabCase = (code: string | undefined) =>
+  code?.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, "$1-$2").toLowerCase();
+
+export const convertToCss = (code: string) => {
+  const cssLines = code.split("\n");
+
+  console.log({ code });
+
+  const convertCssPropertyToCss = (cssProperty: string | undefined) => {
+    return toKebabCase(cssProperty);
+  };
+
+  const convertedCode = cssLines
+    .map((css) => {
+      if (css === "") return;
+
+      console.log({ css });
+
+      const cssSelector = matchCssSelector(css);
+      const closingTag = matchClosingTag(css);
+
+      if (cssSelector) {
+        return `${cssSelector.replace(/"|:/g, "")} {`;
+      }
+
+      if (closingTag) {
+        return `${closingTag}`;
+      }
+
+      const cssProperty = matchCssProperty(css);
+      const cssValue = matchCssValue(css, false);
+
+      if (!cssProperty || !cssValue) {
+        return;
+      }
+
+      const convertedCssProperty = convertCssPropertyToCss(cssProperty);
+      const convertedCssValue = `${cssValue.replace(/"|,/g, "")};`;
+
+      console.log({ cssProperty });
+      console.log({ cssValue });
+      return `${convertedCssProperty}: ${convertedCssValue}`;
+    })
+    .join("\n");
+  return convertedCode;
+};
