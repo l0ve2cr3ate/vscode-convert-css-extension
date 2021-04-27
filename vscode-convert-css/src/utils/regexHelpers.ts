@@ -11,7 +11,7 @@ export const matchSingleHtmlTag = (css: string) =>
   css.match(/^((?!\:|,|\.|@|\$|>|~|\+|#)[a-z])*(\s?)(?={)/g)?.[0];
 
 export const matchCssSelector = (css: string) =>
-  css.match(/(.+|\.?)([:&\.,@,>,~,+,#]|(\s?[a-z]+\s?))\s?[a-z]+\s?(?={)/)?.[0];
+  css.match(/(.+|\.?)([:&\.,@,>,~,+,#]|(\s?[a-z]+\s?))\s?[a-z]*\s?(?={)/)?.[0];
 
 export const hasTernary = (css: string) => css.match(/\s\?\s/g)?.length === 1;
 
