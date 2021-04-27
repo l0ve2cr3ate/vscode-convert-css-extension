@@ -302,7 +302,7 @@ export const convertToCss = (code: string) => {
       const closingTag = matchClosingTag(css);
 
       if (cssSelector) {
-        return `${cssSelector.replace(/"|:/g, "")} {`;
+        return `${cssSelector.trimEnd().replace(/"|(:\s*)$/g, "")} {`;
       }
 
       if (closingTag) {
@@ -317,12 +317,14 @@ export const convertToCss = (code: string) => {
       }
 
       const convertedCssProperty = convertCssPropertyToCss(cssProperty);
-      const convertedCssValue = `${cssValue.replace(/"|,/g, "")};`;
+      const convertedCssValue = `${cssValue.trimStart().replace(/"|,/g, "")};`;
 
       console.log({ cssProperty });
       console.log({ cssValue });
       return `${convertedCssProperty}: ${convertedCssValue}`;
     })
     .join("\n");
+
+  console.log({ convertedCode });
   return convertedCode;
 };
