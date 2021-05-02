@@ -281,31 +281,54 @@ export const convertToStyleObject = (code: string): string => {
 export const toKebabCase = (code: string | undefined) =>
   code?.replace(/([a-z0-9]|(?=[A-Z]))([A-Z])/g, "$1-$2").toLowerCase();
 
+export const convertCssPropertyToCss = (
+  cssProperty: string | undefined,
+  cssPropertyWithInterpolation: string | undefined
+) => {
+  if (cssPropertyWithInterpolation) {
+    if (
+      containsProps(cssPropertyWithInterpolation) &&
+      hasTernary(cssPropertyWithInterpolation)
+    ) {
+      return `\${(props) => (${cssPropertyWithInterpolation.replace(
+        /^\[`\${|}`]$/g,
+        ""
+      )})}`;
+    } else if (containsProps(cssPropertyWithInterpolation)) {
+      return `\${(props) => ${cssPropertyWithInterpolation.replace(
+        /^\[`\${|"}`]$/g,
+        ""
+      )}`;
+    } else {
+      return "TODO INTERPOLATION WITHOUT PROPS";
+    }
+  }
+  return toKebabCase(cssProperty);
+};
+
+export const convertCssValueToCss = (
+  cssValue: string,
+  cssPropertyWithInterpolation: string | undefined
+) => {
+  if (
+    cssPropertyWithInterpolation &&
+    containsProps(cssPropertyWithInterpolation) &&
+    hasTernary(cssPropertyWithInterpolation)
+  ) {
+    return `${cssValue.replace(/"|,|}/g, "")};`;
+  } else if (
+    cssPropertyWithInterpolation &&
+    containsProps(cssPropertyWithInterpolation)
+  ) {
+    return `${cssValue.replace(/"|,/g, "")}"};`;
+  }
+  return `${cssValue.replace(/"|,/g, "")};`;
+};
+
 export const convertToCss = (code: string) => {
   const cssLines = code.split("\n");
 
   console.log({ code });
-
-  const convertCssPropertyToCss = (cssProperty: string | undefined) => {
-    if (cssProperty && matchCssPropertyWithInterpolation(cssProperty.trim())) {
-      if (containsProps(cssProperty)) {
-        return `\${(props) => ${cssProperty.replace(/^\[`\${|"}`]$/g, "")}`;
-      } else {
-        return "TODO INTERPOLATION WITHOUT PROPS";
-      }
-    }
-    return toKebabCase(cssProperty);
-  };
-
-  const convertCssValueToCss = (cssValue: string, cssProperty: string) => {
-    if (
-      matchCssPropertyWithInterpolation(cssProperty.trim()) &&
-      containsProps(cssProperty)
-    ) {
-      return `${cssValue.replace(/"|,/g, "")}"};`;
-    }
-    return `${cssValue.replace(/"|,/g, "")};`;
-  };
 
   const convertedCode = cssLines
     .map((css) => {
@@ -324,17 +347,27 @@ export const convertToCss = (code: string) => {
         return `${closingTag}`;
       }
 
+      const cssPropertyWithInterpolation = matchCssPropertyWithInterpolation(
+        css.trim()
+      );
+
+      console.log({ cssPropertyWithInterpolation });
       const cssProperty = matchCssProperty(css);
-      const cssValue = matchCssValue(css, false);
+      const cssValue = matchCssValue(css, !!cssPropertyWithInterpolation);
+
+      console.log({ cssValue });
 
       if (!cssProperty || !cssValue) {
         return;
       }
 
-      const convertedCssProperty = convertCssPropertyToCss(cssProperty);
+      const convertedCssProperty = convertCssPropertyToCss(
+        cssProperty,
+        cssPropertyWithInterpolation
+      );
       const convertedCssValue = convertCssValueToCss(
         cssValue.trimStart(),
-        cssProperty
+        cssPropertyWithInterpolation
       );
 
       console.log({ cssProperty });
