@@ -177,17 +177,18 @@ export const convertCssValue = (
   }
 };
 
+export const containsProps = (code: string) => code.includes("props");
+
 export const convertToStyleObject = (code: string): string => {
   const cssLines = code.split("\n");
 
   console.log({ code });
 
-  const containsProps: boolean = code.includes("props");
   const destructuredProps: RegExpMatchArray | null = removeDuplicates(
     matchDestructuredProps(code)
   );
 
-  const props = getProps(containsProps, destructuredProps);
+  const props = getProps(containsProps(code), destructuredProps);
 
   const convertedCode = cssLines
     .map((css) => {
@@ -209,9 +210,6 @@ export const convertToStyleObject = (code: string): string => {
       if (singleHtmlTag) {
         return convertCssSelector(singleHtmlTag, true);
       }
-
-      console.log({ singleHtmlTag });
-      console.log({ cssSelector });
 
       if (cssSelector) {
         return convertCssSelector(cssSelector);
@@ -289,7 +287,24 @@ export const convertToCss = (code: string) => {
   console.log({ code });
 
   const convertCssPropertyToCss = (cssProperty: string | undefined) => {
+    if (cssProperty && matchCssPropertyWithInterpolation(cssProperty.trim())) {
+      if (containsProps(cssProperty)) {
+        return `\${(props) => ${cssProperty.replace(/^\[`\${|"}`]$/g, "")}`;
+      } else {
+        return "TODO INTERPOLATION WITHOUT PROPS";
+      }
+    }
     return toKebabCase(cssProperty);
+  };
+
+  const convertCssValueToCss = (cssValue: string, cssProperty: string) => {
+    if (
+      matchCssPropertyWithInterpolation(cssProperty.trim()) &&
+      containsProps(cssProperty)
+    ) {
+      return `${cssValue.replace(/"|,/g, "")}"};`;
+    }
+    return `${cssValue.replace(/"|,/g, "")};`;
   };
 
   const convertedCode = cssLines
@@ -317,7 +332,10 @@ export const convertToCss = (code: string) => {
       }
 
       const convertedCssProperty = convertCssPropertyToCss(cssProperty);
-      const convertedCssValue = `${cssValue.trimStart().replace(/"|,/g, "")};`;
+      const convertedCssValue = convertCssValueToCss(
+        cssValue.trimStart(),
+        cssProperty
+      );
 
       console.log({ cssProperty });
       console.log({ cssValue });
