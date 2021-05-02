@@ -16,8 +16,9 @@ export const matchCssSelector = (css: string) =>
 export const hasTernary = (css: string) => css.match(/\s\?\s/g)?.length === 1;
 
 export const matchCssPropertyWithInterpolation = (css: string) =>
-  css?.match(/^(\${).+(})/)?.[0];
+  css?.match(/^(\[`\${).+(}`])/)?.[0] || css?.match(/^(\${).+(})/)?.[0];
 
+// matchtes cssValue with interpolation for styled component with backticks (css) syntax
 export const matchCssValueWithInterpolation = (css: string) =>
   css.match(/(?<=:\s).*(\${).+(})/)?.[0];
 
