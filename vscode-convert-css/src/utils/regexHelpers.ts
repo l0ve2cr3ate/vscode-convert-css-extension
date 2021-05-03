@@ -4,7 +4,7 @@ export const matchStyledComponentLastLine = (css: string) =>
   css.match(/`;$/)?.[0];
 
 export const matchDestructuredProps = (code: string) =>
-  code.match(/(?<=\({\s?)([a-z-A-Z]+)(}\))?/g);
+  code.match(/(?<=\({\s?)([a-z-A-Z,\s]+)(?=}\))/g);
 
 // regex match part between two characters: (?<=\:)(.*?)(?=\;) - https://stackoverflow.com/questions/1454913/regular-expression-to-find-a-string-included-between-two-characters-while-exclud
 export const matchSingleHtmlTag = (css: string) =>
