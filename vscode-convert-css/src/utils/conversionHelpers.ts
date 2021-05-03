@@ -93,11 +93,19 @@ export const wrapWithQuotes = (value: string) => {
   }
 };
 
-export const removeDuplicates = (arr: any[] | null) => {
+export const removeDuplicates = (arr: any[] | undefined) => {
   if (arr) {
     return [...new Set(...[arr])];
   }
   return null;
+};
+
+export const getDesctructuredProps = (code: string) => {
+  return removeDuplicates(
+    matchDestructuredProps(code)?.flatMap((match) => [
+      ...match.replace(/\s/g, "").split(","),
+    ])
+  );
 };
 
 export const getProps = (
@@ -184,8 +192,8 @@ export const convertToStyleObject = (code: string): string => {
 
   console.log({ code });
 
-  const destructuredProps: RegExpMatchArray | null = removeDuplicates(
-    matchDestructuredProps(code)
+  const destructuredProps: RegExpMatchArray | null = getDesctructuredProps(
+    code
   );
 
   const props = getProps(containsProps(code), destructuredProps);
@@ -329,6 +337,9 @@ export const convertToCss = (code: string) => {
   const cssLines = code.split("\n");
 
   console.log({ code });
+
+  const destructuredProps = getDesctructuredProps(code);
+  console.log("PROPS", destructuredProps);
 
   const convertedCode = cssLines
     .map((css) => {
