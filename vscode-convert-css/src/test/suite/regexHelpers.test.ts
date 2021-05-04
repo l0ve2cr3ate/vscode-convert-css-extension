@@ -144,6 +144,58 @@ suite(
 
       assert.strictEqual(cssProperty, match);
     });
+
+    test("cssPropertyWithInterpolation should match for css property containing interpolation with ternary", function () {
+      const css =
+        '${({ vertical }) => (vertical ? "margin-top" : "margin-left")}: 1rem;';
+      const match = matchCssPropertyWithInterpolation(css);
+      const matchResult =
+        '${({ vertical }) => (vertical ? "margin-top" : "margin-left")}';
+
+      assert.strictEqual(matchResult, match);
+    });
+
+    test("cssPropertyWithInterpolation should match for css property containing interpolation with variable", function () {
+      const css = '${someVar ? "margin-top" : "margin-left"}: 1rem;';
+      const match = matchCssPropertyWithInterpolation(css);
+      const matchResult = '${someVar ? "margin-top" : "margin-left"}';
+
+      assert.strictEqual(matchResult, match);
+    });
+
+    test("cssPropertyWithInterpolation should match for css property for style object containing interpolation and ternary", function () {
+      const css = '[`${props.vertical && "margin-top"}`]: "10px",';
+      const match = matchCssPropertyWithInterpolation(css);
+      const matchResult = '[`${props.vertical && "margin-top"}`]';
+
+      assert.strictEqual(matchResult, match);
+    });
+
+    test("cssPropertyWithInterpolation should match for css property for style object containing interpolation and ternary", function () {
+      const css =
+        '[`${props.vertical ? "margin-top" : "margin-left"}`]: "1rem",';
+      const match = matchCssPropertyWithInterpolation(css);
+      const matchResult =
+        '[`${props.vertical ? "margin-top" : "margin-left"}`]';
+
+      assert.strictEqual(matchResult, match);
+    });
+
+    test("cssPropertyWithInterpolation should match for css property for style object containing interpolation and destructured prop", function () {
+      const css = '[`${vertical && "flex-direction"}`]: "column",';
+      const match = matchCssPropertyWithInterpolation(css);
+      const matchResult = '[`${vertical && "flex-direction"}`]';
+
+      assert.strictEqual(matchResult, match);
+    });
+
+    test("cssPropertyWithInterpolation should match for css property for style object containing interpolation and variable", function () {
+      const css = '[`${someVar ? "margin-top" : "margin-left"}`]: "1rem",';
+      const match = matchCssPropertyWithInterpolation(css);
+      const matchResult = '[`${someVar ? "margin-top" : "margin-left"}`]';
+
+      assert.strictEqual(matchResult, match);
+    });
   }
 );
 
@@ -152,7 +204,7 @@ suite("Tests for Extension Utils Regex matchDestructuredProps", function () {
     const code =
       'const DestructureTest = styled.div`\n  color: ${({ destructuredProp }) => (destructuredProp ? "green" : "purple")};\n  background-color: ${({ primary }) => (primary ? "white" : "gray")};\n`;';
     const destructuredProps = matchDestructuredProps(code);
-    const match = ["destructuredProp", "primary"];
+    const match = [" destructuredProp ", " primary "];
 
     assert.deepStrictEqual(destructuredProps, match);
   });
@@ -169,7 +221,7 @@ suite(
       assert.deepStrictEqual(result, match);
     });
 
-    test("matchDestructuredProps should match css value with interpolation containing backticks and props", function () {
+    test("matchInterpolationWithackticks should match css value with interpolation containing backticks and props", function () {
       const css = "border: ${({ borderColor }) => `1px solid ${borderColor}`};";
       const result = matchInterpolationWithBackticks(css);
       const match = "${({ borderColor }) => `1px solid ${borderColor}`}";
