@@ -116,6 +116,16 @@ export const getProps = (
   destructuredProps,
 });
 
+export const getDesctructuredPropsForStyleProperty = (
+  cssPropertyWithInterpolation: string
+) =>
+  cssPropertyWithInterpolation
+    .match(/(?<=`\${)([a-zA-Z\s&|]+)(?=[^"]+)/g)
+    ?.join()
+    .split(" ")
+    .filter((str) => str.match(/^[a-zA-Z]+$/g))
+    .join(", ");
+
 export const isUnitlessCssProperty = (
   unitlessCssProperties: string[],
   cssProperty: string
@@ -291,7 +301,8 @@ export const toKebabCase = (code: string | undefined) =>
 
 export const convertCssPropertyToCss = (
   cssProperty: string | undefined,
-  cssPropertyWithInterpolation: string | undefined
+  cssPropertyWithInterpolation: string | undefined,
+  destructuredProps: RegExpMatchArray | null
 ) => {
   if (cssPropertyWithInterpolation) {
     if (
@@ -307,7 +318,17 @@ export const convertCssPropertyToCss = (
         /^\[`\${|"}`]$/g,
         ""
       )}`;
+    } else if (destructuredProps) {
+      const props = getDesctructuredPropsForStyleProperty(
+        cssPropertyWithInterpolation
+      );
+
+      return `\${(${props}) => ${cssPropertyWithInterpolation.replace(
+        /^\[`\${|"}`]$/g,
+        ""
+      )}`;
     } else {
+      // Without destructured props:
       return "TODO INTERPOLATION WITHOUT PROPS";
     }
   }
@@ -320,14 +341,10 @@ export const convertCssValueToCss = (
 ) => {
   if (
     cssPropertyWithInterpolation &&
-    containsProps(cssPropertyWithInterpolation) &&
     hasTernary(cssPropertyWithInterpolation)
   ) {
     return `${cssValue.replace(/"|,|}/g, "")};`;
-  } else if (
-    cssPropertyWithInterpolation &&
-    containsProps(cssPropertyWithInterpolation)
-  ) {
+  } else if (cssPropertyWithInterpolation) {
     return `${cssValue.replace(/"|,/g, "")}"};`;
   }
   return `${cssValue.replace(/"|,/g, "")};`;
@@ -374,7 +391,8 @@ export const convertToCss = (code: string) => {
 
       const convertedCssProperty = convertCssPropertyToCss(
         cssProperty,
-        cssPropertyWithInterpolation
+        cssPropertyWithInterpolation,
+        destructuredProps
       );
       const convertedCssValue = convertCssValueToCss(
         cssValue.trimStart(),
