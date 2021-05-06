@@ -120,10 +120,10 @@ export const getDesctructuredPropsForStyleProperty = (
   cssPropertyWithInterpolation: string
 ) =>
   cssPropertyWithInterpolation
-    .match(/(?<=`\${)([a-zA-Z\s&|]+)(?=[^"]+)/g)
-    ?.join()
+    .replace(/^(\[`\${)|(}`])$/g, "")
     .split(" ")
-    .filter((str) => str.match(/^[a-zA-Z]+$/g))
+    // filter out css properties/values within quotes and && || ? operators
+    .filter((str) => str.match(/^([^?|:]?$|[^"&|?:].+)/g))
     .join(", ");
 
 export const isUnitlessCssProperty = (
@@ -318,12 +318,24 @@ export const convertCssPropertyToCss = (
         /^\[`\${|"}`]$/g,
         ""
       )}`;
+    } else if (destructuredProps && hasTernary(cssPropertyWithInterpolation)) {
+      // [`${vertical ? "margin-top" : "margin-left"}`]: "1rem",
+      //   ${({ vertical }) => (vertical ? "margin-top" : "margin-left")}: 1rem;
+
+      const props = getDesctructuredPropsForStyleProperty(
+        cssPropertyWithInterpolation
+      );
+
+      return `\${({ ${props} }) => (${cssPropertyWithInterpolation.replace(
+        /^\[`\${|}`]$/g,
+        ""
+      )})}`;
     } else if (destructuredProps) {
       const props = getDesctructuredPropsForStyleProperty(
         cssPropertyWithInterpolation
       );
 
-      return `\${(${props}) => ${cssPropertyWithInterpolation.replace(
+      return `\${({ ${props} }) => ${cssPropertyWithInterpolation.replace(
         /^\[`\${|"}`]$/g,
         ""
       )}`;
