@@ -117,14 +117,20 @@ export const getProps = (
 });
 
 export const getDesctructuredPropsForStyleProperty = (
-  cssPropertyWithInterpolation: string
-) =>
-  cssPropertyWithInterpolation
-    .replace(/^(\[`\${)|(}`])$/g, "")
-    .split(" ")
-    // filter out css properties/values within quotes and && || ? operators
-    .filter((str) => str.match(/^([^?|:]?$|[^"&|?:].+)/g))
-    .join(", ");
+  cssPropertyWithInterpolation: string,
+  desctructuredProps: RegExpMatchArray
+) => {
+  return (
+    cssPropertyWithInterpolation
+      .replace(/^(\[`\${)|(}`])$/g, "")
+      .split(" ")
+      // filter out css properties/values within quotes and && || ? operators
+      .filter((str) => str.match(/^([^?|:]?$|[^"&|?:].+)/g))
+      // Filter out variables
+      .filter((propertyProp) => desctructuredProps.includes(propertyProp))
+      .join(", ")
+  );
+};
 
 export const isUnitlessCssProperty = (
   unitlessCssProperties: string[],
@@ -319,29 +325,39 @@ export const convertCssPropertyToCss = (
         ""
       )}`;
     } else if (destructuredProps && hasTernary(cssPropertyWithInterpolation)) {
-      // [`${vertical ? "margin-top" : "margin-left"}`]: "1rem",
-      //   ${({ vertical }) => (vertical ? "margin-top" : "margin-left")}: 1rem;
-
-      const props = getDesctructuredPropsForStyleProperty(
-        cssPropertyWithInterpolation
+      const propertyProps = getDesctructuredPropsForStyleProperty(
+        cssPropertyWithInterpolation,
+        destructuredProps
       );
 
-      return `\${({ ${props} }) => (${cssPropertyWithInterpolation.replace(
+      // Styled component contains destructured props, but this property does not.
+      if (!propertyProps) {
+        return `${cssPropertyWithInterpolation.replace(/^\[`|`]$/g, "")}`;
+      }
+
+      return `\${({ ${propertyProps} }) => (${cssPropertyWithInterpolation.replace(
         /^\[`\${|}`]$/g,
         ""
       )})}`;
     } else if (destructuredProps) {
-      const props = getDesctructuredPropsForStyleProperty(
-        cssPropertyWithInterpolation
+      const propertyProps = getDesctructuredPropsForStyleProperty(
+        cssPropertyWithInterpolation,
+        destructuredProps
       );
 
-      return `\${({ ${props} }) => ${cssPropertyWithInterpolation.replace(
+      // Styled component contains destructured props, but this property does not.
+      if (!propertyProps) {
+        return `${cssPropertyWithInterpolation.replace(/^\[`|"}`]$/g, "")}`;
+      }
+
+      return `\${({ ${propertyProps} }) => ${cssPropertyWithInterpolation.replace(
         /^\[`\${|"}`]$/g,
         ""
       )}`;
+    } else if (hasTernary(cssPropertyWithInterpolation)) {
+      return `${cssPropertyWithInterpolation.replace(/^\[`|`]$/g, "")}`;
     } else {
-      // Without destructured props:
-      return "TODO INTERPOLATION WITHOUT PROPS";
+      return `${cssPropertyWithInterpolation.replace(/^\[`|"}`]$/g, "")}`;
     }
   }
   return toKebabCase(cssProperty);
